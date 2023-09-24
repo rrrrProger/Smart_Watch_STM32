@@ -222,8 +222,8 @@ void check_menu(){
 void display_david_star(uint16_t color) {
 	int star_width = 30;
 	int star_height = 50;
-	int star_distance = 60;
-	int start_y = 33;
+	int star_distance = 67;
+	int start_y = 25;
 	int width = 1;
 
 	struct point point_a = {ILI9341_WIDTH / 2, start_y};
@@ -287,7 +287,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	check_menu();
+    /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
   }
@@ -307,8 +307,8 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_LSE;
-  RCC_OscInitStruct.LSEState = RCC_LSE_ON;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
@@ -331,7 +331,7 @@ void SystemClock_Config(void)
     Error_Handler();
   }
   PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_RTC|RCC_PERIPHCLK_ADC;
-  PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_LSE;
+  PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_HSE_DIV128;
   PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV2;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
@@ -455,17 +455,17 @@ static void MX_RTC_Init(void)
 
   /** Initialize RTC and set the Time and Date
   */
-  sTime.Hours = 0x13;
-  sTime.Minutes = 0x45;
+  sTime.Hours = 0x0;
+  sTime.Minutes = 0x0;
   sTime.Seconds = 0x0;
 
   if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BCD) != HAL_OK)
   {
     Error_Handler();
   }
-  DateToUpdate.WeekDay = RTC_WEEKDAY_SUNDAY;
+  DateToUpdate.WeekDay = RTC_WEEKDAY_FRIDAY;
   DateToUpdate.Month = RTC_MONTH_SEPTEMBER;
-  DateToUpdate.Date = 0x24;
+  DateToUpdate.Date = 0x22;
   DateToUpdate.Year = 0x23;
 
   if (HAL_RTC_SetDate(&hrtc, &DateToUpdate, RTC_FORMAT_BCD) != HAL_OK)
