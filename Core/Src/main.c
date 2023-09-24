@@ -134,18 +134,39 @@ char date[30] = {0};
 
 void display_date_and_time() {
 	ILI9341_WriteString(40, 10, date, Font_7x10, ILI9341_GREEN, ILI9341_BLACK);
-	ILI9341_WriteString(40, 100, time, Font_11x18, ILI9341_WHITE, ILI9341_BLACK);
+	ILI9341_WriteString(40, 104, time, Font_11x18, ILI9341_WHITE, ILI9341_BLACK);
+}
+
+void display_battery_status() {
+  char  adc_char[20];
+  float adc_value = 0;
+  float bat_percent = 0;
+  int   display_bat = 0;
+  int   supply_voltage = 3.3;
+  int   battery_voltage = 4.2;
+  int   width = 0;
+  struct point point_a = {128, 7};
+  struct point point_b = {152, 7};
+  struct point point_c = {152, 20};
+  struct point point_d = {128, 20};
+
+  HAL_ADC_Start(&hadc2);
+  HAL_ADC_PollForConversion(&hadc2, 1);
+  adc_value = HAL_ADC_GetValue(&hadc2);
+  bat_percent = adc_value / 4095;
+  display_bat = bat_percent * supply_voltage / battery_voltage * 100;
+
+  sprintf(adc_char, "%d", display_bat);
+  ILI9341_WriteString(133, 10, adc_char, Font_7x10, ILI9341_RED, ILI9341_BLACK);
+  ILI9341_DrawRectangle(point_a, point_b, point_c, point_d, ILI9341_RED, width);
+  HAL_ADC_Stop(&hadc2);
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-
-	char voltage_dc[2];
 	char *dat;
 	RTC_TimeTypeDef sTime = {0};
 	RTC_DateTypeDef sDate = {0};
-	int raw;
-	float voltage = 0;
 	enum WEEKDAY {MONDAY = 1, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY};
 
 	HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
@@ -154,6 +175,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	sprintf(date, "%s %02d/%02d/%02d", dat, sDate.Date, sDate.Month, sDate.Year);
 	sprintf(time, "%02d:%02d:%02d", sTime.Hours, sTime.Minutes, sTime.Seconds);
 	display_date_and_time();
+	display_battery_status();
 }
 
 void init() {
@@ -161,17 +183,7 @@ void init() {
     ILI9341_Init();
 }
 
-void display_battery_status() {
-  char adc_char[20];
-  float adc_value = 0;
 
-  HAL_ADC_Start(&hadc2);
-  HAL_ADC_PollForConversion(&hadc2, 1);
-  adc_value = HAL_ADC_GetValue(&hadc2);
-  HAL_ADC_Stop(&hadc2);
-  sprintf(adc_char, "Vol : %f", adc_value);
-  ILI9341_WriteString(10, 70, adc_char, Font_11x18, ILI9341_RED, ILI9341_BLACK);
-}
 
 void read_menu(uint8_t key) {
 	enum KEY { LEFT, RIGHT, BOTTOM };
@@ -211,7 +223,8 @@ void display_david_star(uint16_t color) {
 	int star_width = 30;
 	int star_height = 50;
 	int star_distance = 60;
-	int start_y = 35;
+	int start_y = 33;
+	int width = 1;
 
 	struct point point_a = {ILI9341_WIDTH / 2, start_y};
 	struct point point_b = {ILI9341_WIDTH / 2 - star_width, start_y + star_height};
@@ -221,8 +234,8 @@ void display_david_star(uint16_t color) {
 	struct point point_b1 = {ILI9341_WIDTH / 2 - star_width, start_y + star_distance - star_height};
 	struct point point_c1 = {ILI9341_WIDTH / 2 + star_width, start_y + star_distance - star_height};
 
-	ILI9341_DrawTriangle(point_a, point_b, point_c, color);
-	ILI9341_DrawTriangle(point_a1, point_b1, point_c1, color);
+	ILI9341_DrawTriangle(point_a, point_b, point_c, color, width);
+	ILI9341_DrawTriangle(point_a1, point_b1, point_c1, color, width);
 }
 
 /* USER CODE END 0 */
@@ -234,9 +247,6 @@ void display_david_star(uint16_t color) {
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-  char buffer[50];
-  float voltage_bat = 0;
-  float max_voltage = 4.2;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -445,17 +455,17 @@ static void MX_RTC_Init(void)
 
   /** Initialize RTC and set the Time and Date
   */
-  sTime.Hours = 0x0;
-  sTime.Minutes = 0x0;
+  sTime.Hours = 0x13;
+  sTime.Minutes = 0x45;
   sTime.Seconds = 0x0;
 
   if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BCD) != HAL_OK)
   {
     Error_Handler();
   }
-  DateToUpdate.WeekDay = RTC_WEEKDAY_FRIDAY;
+  DateToUpdate.WeekDay = RTC_WEEKDAY_SUNDAY;
   DateToUpdate.Month = RTC_MONTH_SEPTEMBER;
-  DateToUpdate.Date = 0x22;
+  DateToUpdate.Date = 0x24;
   DateToUpdate.Year = 0x23;
 
   if (HAL_RTC_SetDate(&hrtc, &DateToUpdate, RTC_FORMAT_BCD) != HAL_OK)

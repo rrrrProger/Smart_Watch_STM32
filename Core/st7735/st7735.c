@@ -312,7 +312,7 @@ void ILI9341_InvertColors(bool invert) {
 }
 
 
-void ILI9341_DrawLine(struct point point_a, struct point point_b, uint16_t color) {
+void ILI9341_DrawLine(struct point point_a, struct point point_b, uint16_t color, int width) {
 	float x = point_a.x;
 	float y = point_a.y;
 	int16_t dx = point_b.x - point_a.x;
@@ -324,18 +324,30 @@ void ILI9341_DrawLine(struct point point_a, struct point point_b, uint16_t color
 	for (int v = 0; v < steps; v++) {
 		x = x + x_increment;
 		y = y + y_increment;
-		ILI9341_DrawPixel(round(x), round(y), color);
-		ILI9341_DrawPixel(round(x) - 1, round(y), color);
-		ILI9341_DrawPixel(round(x) + 1, round(y), color);
-		ILI9341_DrawPixel(round(x), round(y) - 1, color);
-		ILI9341_DrawPixel(round(x), round(y) + 1, color);
+		if (width != 0 )
+			for (int j = 0; j < width; j++) {
+				ILI9341_DrawPixel(round(x), round(y), color);
+				ILI9341_DrawPixel(round(x) - width, round(y), color);
+				ILI9341_DrawPixel(round(x) + width, round(y), color);
+				ILI9341_DrawPixel(round(x), round(y) - width, color);
+				ILI9341_DrawPixel(round(x), round(y) + width, color);
+			}
+		else
+			ILI9341_DrawPixel(round(x), round(y), color);
 	}
 }
 
-void ILI9341_DrawTriangle(struct point point_a, struct point point_b, struct point point_c, uint16_t color) {
-	ILI9341_DrawLine(point_a, point_b, color);
-	ILI9341_DrawLine(point_a, point_c, color);
-	ILI9341_DrawLine(point_b, point_c, color);
+void ILI9341_DrawTriangle(struct point point_a, struct point point_b, struct point point_c, uint16_t color, int width) {
+	ILI9341_DrawLine(point_a, point_b, color, width);
+	ILI9341_DrawLine(point_a, point_c, color, width);
+	ILI9341_DrawLine(point_b, point_c, color, width);
+}
+
+void ILI9341_DrawRectangle(struct point point_a, struct point point_b, struct point point_c, struct point point_d, uint16_t color, int width) {
+	ILI9341_DrawLine(point_a, point_b, color, width);
+	ILI9341_DrawLine(point_b, point_c, color, width);
+	ILI9341_DrawLine(point_c, point_d, color, width);
+	ILI9341_DrawLine(point_d, point_a, color, width);
 }
 
 void ILI9341_DrawCircle(struct point center, int radius) {
