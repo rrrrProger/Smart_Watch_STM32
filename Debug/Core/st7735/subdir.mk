@@ -1,6 +1,6 @@
 ################################################################################
 # Automatically-generated file. Do not edit!
-# Toolchain: GNU Tools for STM32 (9-2020-q2-update)
+# Toolchain: GNU Tools for STM32 (10.3-2021.10)
 ################################################################################
 
 # Add inputs and outputs from these tool invocations to the build variables 
@@ -21,13 +21,13 @@ C_DEPS += \
 
 
 # Each subdirectory must supply rules for building sources it contributes
-Core/st7735/%.o: ../Core/st7735/%.c Core/st7735/subdir.mk
-	arm-none-eabi-gcc "$<" -mcpu=cortex-m3 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F103xB -c -I../Core/Inc -I../Drivers/STM32F1xx_HAL_Driver/Inc -I../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I../Drivers/CMSIS/Include -I"C:/Users/Roman/STM32CubeIDE/workspace_1.8.0/Watch/Core/max30102" -I"C:/Users/Roman/STM32CubeIDE/workspace_1.8.0/Watch/Core/st7735" -I"C:/Users/Roman/STM32CubeIDE/workspace_1.8.0/Watch/Core/esp8266" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" --specs=nano.specs -mfloat-abi=soft -mthumb -o "$@"
+Core/st7735/%.o Core/st7735/%.su Core/st7735/%.cyclo: ../Core/st7735/%.c Core/st7735/subdir.mk
+	arm-none-eabi-gcc "$<" -mcpu=cortex-m3 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F103xB -c -I../Core/Inc -I../Drivers/STM32F1xx_HAL_Driver/Inc -I../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I../Drivers/CMSIS/Include -I"/home/roman/Smart_Watch_STM32/Core/max30102" -I"/home/roman/Smart_Watch_STM32/Core/st7735" -I"/home/roman/Smart_Watch_STM32/Core/esp8266" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" --specs=nano.specs -mfloat-abi=soft -mthumb -o "$@"
 
 clean: clean-Core-2f-st7735
 
 clean-Core-2f-st7735:
-	-$(RM) ./Core/st7735/fonts.d ./Core/st7735/fonts.o ./Core/st7735/st7735.d ./Core/st7735/st7735.o ./Core/st7735/touch.d ./Core/st7735/touch.o
+	-$(RM) ./Core/st7735/fonts.cyclo ./Core/st7735/fonts.d ./Core/st7735/fonts.o ./Core/st7735/fonts.su ./Core/st7735/st7735.cyclo ./Core/st7735/st7735.d ./Core/st7735/st7735.o ./Core/st7735/st7735.su ./Core/st7735/touch.cyclo ./Core/st7735/touch.d ./Core/st7735/touch.o ./Core/st7735/touch.su
 
 .PHONY: clean-Core-2f-st7735
 

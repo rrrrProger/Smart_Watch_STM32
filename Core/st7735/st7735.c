@@ -221,6 +221,10 @@ void ILI9341_DrawPixel(uint16_t x, uint16_t y, uint16_t color) {
     ILI9341_Unselect();
 }
 
+void ILI9341_DrawPoint(struct point point_a, uint16_t color) {
+	ILI9341_DrawPixel(point_a.x, point_a.y, color);
+}
+
 static void ILI9341_WriteChar(uint16_t x, uint16_t y, char ch, FontDef font, uint16_t color, uint16_t bgcolor) {
     uint32_t i, b, j;
 
@@ -309,10 +313,10 @@ void ILI9341_InvertColors(bool invert) {
 
 
 void ILI9341_DrawLine(struct point point_a, struct point point_b, uint16_t color) {
-	uint16_t x = point_a.x;
-	uint16_t y = point_a.y;
-	uint16_t dx = point_b.x - point_a.x;
-	uint16_t dy = point_b.y - point_a.y;
+	float x = point_a.x;
+	float y = point_a.y;
+	int16_t dx = point_b.x - point_a.x;
+	int16_t dy = point_b.y - point_a.y;
 	int steps = abs(dx) > abs(dy) ? abs(dx) : abs(dy);
 	float x_increment = dx / (float) steps;
 	float y_increment = dy / (float) steps;
@@ -321,6 +325,10 @@ void ILI9341_DrawLine(struct point point_a, struct point point_b, uint16_t color
 		x = x + x_increment;
 		y = y + y_increment;
 		ILI9341_DrawPixel(round(x), round(y), color);
+		ILI9341_DrawPixel(round(x) - 1, round(y), color);
+		ILI9341_DrawPixel(round(x) + 1, round(y), color);
+		ILI9341_DrawPixel(round(x), round(y) - 1, color);
+		ILI9341_DrawPixel(round(x), round(y) + 1, color);
 	}
 }
 
@@ -328,4 +336,8 @@ void ILI9341_DrawTriangle(struct point point_a, struct point point_b, struct poi
 	ILI9341_DrawLine(point_a, point_b, color);
 	ILI9341_DrawLine(point_a, point_c, color);
 	ILI9341_DrawLine(point_b, point_c, color);
+}
+
+void ILI9341_DrawCircle(struct point center, int radius) {
+	;
 }

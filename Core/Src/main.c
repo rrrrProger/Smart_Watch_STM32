@@ -22,7 +22,6 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "st7735.h"
-#include "max30102.h"
 #include "fonts.h"
 #include <stdio.h>
 #include "touch.h"
@@ -34,7 +33,6 @@
 /* USER CODE BEGIN PTD */
 int iteration = 0;
 int last_beat = 0;
-max30102_t max30102;
 int delays[20];
 
 char *get_week_day(int day) {
@@ -68,6 +66,7 @@ char *get_week_day(int day) {
 	}
 }
 
+/*
 void max30102_plot(uint32_t ir_sample, uint32_t red_sample)
 {
 	char ir_sample_char[6];
@@ -84,7 +83,7 @@ void max30102_plot(uint32_t ir_sample, uint32_t red_sample)
 	ILI9341_WriteString(0, 50, it_char, Font_11x18, ILI9341_WHITE, ILI9341_BLACK);
 	iteration++;
 }
-
+*/
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -132,6 +131,12 @@ static void MX_ADC2_Init(void);
 /* USER CODE BEGIN 0 */
 char time[30] = {0};
 char date[30] = {0};
+
+void display_date_and_time() {
+	ILI9341_WriteString(40, 10, date, Font_7x10, ILI9341_GREEN, ILI9341_BLACK);
+	ILI9341_WriteString(40, 100, time, Font_11x18, ILI9341_WHITE, ILI9341_BLACK);
+}
+
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 
@@ -148,6 +153,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	dat = get_week_day(sDate.WeekDay);
 	sprintf(date, "%s %02d/%02d/%02d", dat, sDate.Date, sDate.Month, sDate.Year);
 	sprintf(time, "%02d:%02d:%02d", sTime.Hours, sTime.Minutes, sTime.Seconds);
+	display_date_and_time();
 }
 
 void init() {
@@ -165,11 +171,6 @@ void display_battery_status() {
   HAL_ADC_Stop(&hadc2);
   sprintf(adc_char, "Vol : %f", adc_value);
   ILI9341_WriteString(10, 70, adc_char, Font_11x18, ILI9341_RED, ILI9341_BLACK);
-}
-
-void display_date_and_time() {
-	ILI9341_WriteString(40, 10, date, Font_7x10, ILI9341_GREEN, ILI9341_BLACK);
-	ILI9341_WriteString(0, 40, time, Font_11x18, ILI9341_RED, ILI9341_BLACK);
 }
 
 void read_menu(uint8_t key) {
@@ -206,12 +207,24 @@ void check_menu(){
   }
 }
 
-void display_david_start() {
-	struct point point_a = {10, 10};
-	struct point point_b = {20, 160};
+void display_david_star(uint16_t color) {
+	int star_width = 30;
+	int star_height = 50;
+	int star_distance = 60;
+	int start_y = 35;
 
-	ILI9341_DrawTriangle(point_a, point_b, ILI9341_RED);
+	struct point point_a = {ILI9341_WIDTH / 2, start_y};
+	struct point point_b = {ILI9341_WIDTH / 2 - star_width, start_y + star_height};
+	struct point point_c = {ILI9341_WIDTH / 2 + star_width, start_y + star_height};
+
+	struct point point_a1 = {ILI9341_WIDTH / 2, start_y + star_distance};
+	struct point point_b1 = {ILI9341_WIDTH / 2 - star_width, start_y + star_distance - star_height};
+	struct point point_c1 = {ILI9341_WIDTH / 2 + star_width, start_y + star_distance - star_height};
+
+	ILI9341_DrawTriangle(point_a, point_b, point_c, color);
+	ILI9341_DrawTriangle(point_a1, point_b1, point_c1, color);
 }
+
 /* USER CODE END 0 */
 
 /**
@@ -251,13 +264,13 @@ int main(void)
   MX_I2C2_Init();
   MX_USART1_UART_Init();
   MX_ADC2_Init();
-  HAL_TIM_Base_Start_IT(&htim2);
   /* USER CODE BEGIN 2 */
   init();
   ILI9341_FillScreen(ILI9341_BLACK);
 
   // Read The ADC Conversion Result & Map It To PWM DutyCycle
-  display_david_start();
+  display_david_star(ILI9341_BLUE);
+  HAL_TIM_Base_Start_IT(&htim2);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -265,10 +278,6 @@ int main(void)
   while (1)
   {
 	check_menu();
-//	display_date_and_time();
-//	display_battery_status();
-
-    /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
   }
@@ -297,6 +306,7 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+
   /** Initializes the CPU, AHB and APB buses clocks
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
@@ -336,6 +346,7 @@ static void MX_ADC2_Init(void)
   /* USER CODE BEGIN ADC2_Init 1 */
 
   /* USER CODE END ADC2_Init 1 */
+
   /** Common config
   */
   hadc2.Instance = ADC2;
@@ -349,6 +360,7 @@ static void MX_ADC2_Init(void)
   {
     Error_Handler();
   }
+
   /** Configure Regular Channel
   */
   sConfig.Channel = ADC_CHANNEL_6;
@@ -416,6 +428,7 @@ static void MX_RTC_Init(void)
   /* USER CODE BEGIN RTC_Init 1 */
 
   /* USER CODE END RTC_Init 1 */
+
   /** Initialize RTC Only
   */
   hrtc.Instance = RTC;
@@ -625,6 +638,8 @@ static void MX_USART1_UART_Init(void)
 static void MX_GPIO_Init(void)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
+/* USER CODE BEGIN MX_GPIO_Init_1 */
+/* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOC_CLK_ENABLE();
@@ -638,6 +653,9 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_7|GPIO_PIN_8
                           |GPIO_PIN_11, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : PC13 */
   GPIO_InitStruct.Pin = GPIO_PIN_13;
@@ -667,8 +685,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : PB1 */
-  GPIO_InitStruct.Pin = GPIO_PIN_1;
+  /*Configure GPIO pins : PB1 PB6 */
+  GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_6;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
@@ -685,9 +703,18 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : PB7 */
+  GPIO_InitStruct.Pin = GPIO_PIN_7;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
   /*Configure peripheral I/O remapping */
   __HAL_AFIO_REMAP_SPI1_ENABLE();
 
+/* USER CODE BEGIN MX_GPIO_Init_2 */
+/* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
@@ -725,4 +752,3 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
-
