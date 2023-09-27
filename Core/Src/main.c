@@ -214,7 +214,7 @@ void check_menu(){
   if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_3) == GPIO_PIN_RESET) {
 	  read_menu(LEFT);
   }
-  if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_2) == GPIO_PIN_RESET) {
+  if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_12) == GPIO_PIN_RESET) {
 	  read_menu(RIGHT);
   }
 }
@@ -289,7 +289,7 @@ int main(void)
   ILI9341_FillScreen(ILI9341_BLACK);
   // Read The ADC Conversion Result & Map It To PWM DutyCycle
 //  display_david_star(ILI9341_GREEN, start_x, start_y);
-  HAL_TIM_Base_Start_IT(&htim2);
+//  HAL_TIM_Base_Start_IT(&htim2);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -682,20 +682,20 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PA1 PA5 */
-  GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_5;
+  /*Configure GPIO pin : PA1 */
+  GPIO_InitStruct.Pin = GPIO_PIN_1;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PA2 PA12 PA15 */
-  GPIO_InitStruct.Pin = GPIO_PIN_2|GPIO_PIN_12|GPIO_PIN_15;
+  /*Configure GPIO pins : PA2 PA15 */
+  GPIO_InitStruct.Pin = GPIO_PIN_2|GPIO_PIN_15;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : PA3 */
-  GPIO_InitStruct.Pin = GPIO_PIN_3;
+  /*Configure GPIO pins : PA3 PA5 PA12 */
+  GPIO_InitStruct.Pin = GPIO_PIN_3|GPIO_PIN_5|GPIO_PIN_12;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
@@ -739,6 +739,12 @@ static void MX_GPIO_Init(void)
   HAL_NVIC_SetPriority(EXTI3_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI3_IRQn);
 
+  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
 }
@@ -746,12 +752,14 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-  if(GPIO_Pin == GPIO_PIN_3) {
-	  ILI9341_WriteString(10, 10, "Pressed LEFT", Font_11x18, ILI9341_RED, ILI9341_BLACK);
-	  ILI9341_FillScreen(ILI9341_BLACK);
-  } else {
-      __NOP();
-  }
+	if(GPIO_Pin == GPIO_PIN_5) {
+		ILI9341_WriteString(10, 10, "Pressed RIGHT", Font_11x18, ILI9341_RED, ILI9341_BLACK);
+	 } else if(GPIO_Pin == GPIO_PIN_3){
+		 ILI9341_WriteString(10, 10, "Pressed LEFT", Font_11x18, ILI9341_RED, ILI9341_BLACK);
+	 } else {
+		 __NOP();
+	 }
+	 ILI9341_FillScreen(ILI9341_BLACK);
 }
 /* USER CODE END 4 */
 
