@@ -221,8 +221,8 @@ void ILI9341_DrawPixel(uint16_t x, uint16_t y, uint16_t color) {
     ILI9341_Unselect();
 }
 
-void ILI9341_DrawPoint(struct point point_a, uint16_t color) {
-	ILI9341_DrawPixel(point_a.x, point_a.y, color);
+void ILI9341_DrawPoint(struct point *point_a, uint16_t color) {
+	ILI9341_DrawPixel(point_a->x, point_a->y, color);
 }
 
 static void ILI9341_WriteChar(uint16_t x, uint16_t y, char ch, FontDef font, uint16_t color, uint16_t bgcolor) {
@@ -312,11 +312,11 @@ void ILI9341_InvertColors(bool invert) {
 }
 
 
-void ILI9341_DrawLine(struct point point_a, struct point point_b, uint16_t color, int width) {
-	float x = point_a.x;
-	float y = point_a.y;
-	int16_t dx = point_b.x - point_a.x;
-	int16_t dy = point_b.y - point_a.y;
+void ILI9341_DrawLine(struct point *point_a, struct point *point_b, uint16_t color, int width) {
+	float x = point_a->x;
+	float y = point_a->y;
+	int16_t dx = point_b->x - point_a->x;
+	int16_t dy = point_b->y - point_a->y;
 	int steps = abs(dx) > abs(dy) ? abs(dx) : abs(dy);
 	float x_increment = dx / (float) steps;
 	float y_increment = dy / (float) steps;
@@ -337,13 +337,13 @@ void ILI9341_DrawLine(struct point point_a, struct point point_b, uint16_t color
 	}
 }
 
-void ILI9341_DrawTriangle(struct point point_a, struct point point_b, struct point point_c, uint16_t color, int width) {
+void ILI9341_DrawTriangle(struct point *point_a, struct point *point_b, struct point *point_c, uint16_t color, int width) {
 	ILI9341_DrawLine(point_a, point_b, color, width);
 	ILI9341_DrawLine(point_a, point_c, color, width);
 	ILI9341_DrawLine(point_b, point_c, color, width);
 }
 
-void ILI9341_DrawRectangle(struct point point_a, struct point point_b, struct point point_c, struct point point_d, uint16_t color, int width) {
+void ILI9341_DrawRectangle(struct point *point_a, struct point *point_b, struct point *point_c, struct point *point_d, uint16_t color, int width) {
 	ILI9341_DrawLine(point_a, point_b, color, width);
 	ILI9341_DrawLine(point_b, point_c, color, width);
 	ILI9341_DrawLine(point_c, point_d, color, width);

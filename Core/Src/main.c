@@ -138,27 +138,30 @@ void display_date_and_time() {
 }
 
 void display_battery_status() {
-  char  adc_char[20];
-  float adc_value = 0;
-  float bat_percent = 0;
-  int   display_bat = 0;
-  int   supply_voltage = 3.3;
-  int   battery_voltage = 4.2;
-  int   width = 0;
-  struct point point_a = {128, 7};
-  struct point point_b = {152, 7};
-  struct point point_c = {152, 20};
-  struct point point_d = {128, 20};
+  char    adc_char[20];
+  float   adc_value = 0;
+  float   bat_percent = 0;
+  int     display_bat = 0;
+  float   supply_voltage = 3.28;
+  float   min_voltage = 3.2;
+  int     battery_voltage = 4.2;
+  int     width = 0;
+  struct  point point_a = {128, 7};
+  struct  point point_b = {152, 7};
+  struct  point point_c = {152, 20};
+  struct  point point_d = {128, 20};
 
   HAL_ADC_Start(&hadc2);
   HAL_ADC_PollForConversion(&hadc2, 1);
   adc_value = HAL_ADC_GetValue(&hadc2);
   bat_percent = adc_value / 4095;
-  display_bat = bat_percent * supply_voltage / battery_voltage * 100;
+  display_bat = bat_percent * supply_voltage * 2 * 100 - min_voltage * 100;
+  if (display_bat < 0)
+	  display_bat = 0;
 
   sprintf(adc_char, "%d", display_bat);
   ILI9341_WriteString(133, 10, adc_char, Font_7x10, ILI9341_RED, ILI9341_BLACK);
-  ILI9341_DrawRectangle(point_a, point_b, point_c, point_d, ILI9341_RED, width);
+  ILI9341_DrawRectangle(&point_a, &point_b, &point_c, &point_d, ILI9341_RED, width);
   HAL_ADC_Stop(&hadc2);
 }
 
@@ -208,36 +211,39 @@ void read_menu(uint8_t key) {
 
 void check_menu(){
   enum KEY {LEFT, RIGHT, BOTTOM};
+  if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_3) == GPIO_PIN_RESET) {
+	  read_menu(LEFT);
+  }
   if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_2) == GPIO_PIN_RESET) {
 	  read_menu(RIGHT);
   }
-  if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_15) == GPIO_PIN_RESET) {
-	  read_menu(LEFT);
-  }
-  if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_9) == GPIO_PIN_RESET) {
-	  read_menu(BOTTOM);
-  }
 }
 
-void display_david_star(uint16_t color) {
+void display_david_star(uint16_t color, int start_x, int start_y) {
 	int star_width = 30;
 	int star_height = 50;
 	int star_distance = 67;
-	int start_y = 25;
+
 	int width = 1;
 
-	struct point point_a = {ILI9341_WIDTH / 2, start_y};
-	struct point point_b = {ILI9341_WIDTH / 2 - star_width, start_y + star_height};
-	struct point point_c = {ILI9341_WIDTH / 2 + star_width, start_y + star_height};
+	struct point point_a = {start_x, start_y};
+	struct point point_b = {start_x - star_width, start_y + star_height};
+	struct point point_c = {start_x + star_width, start_y + star_height};
 
-	struct point point_a1 = {ILI9341_WIDTH / 2, start_y + star_distance};
-	struct point point_b1 = {ILI9341_WIDTH / 2 - star_width, start_y + star_distance - star_height};
-	struct point point_c1 = {ILI9341_WIDTH / 2 + star_width, start_y + star_distance - star_height};
+	struct point point_a1 = {start_x, start_y + star_distance};
+	struct point point_b1 = {start_x - star_width, start_y + star_distance - star_height};
+	struct point point_c1 = {start_x + star_width, start_y + star_distance - star_height};
 
-	ILI9341_DrawTriangle(point_a, point_b, point_c, color, width);
-	ILI9341_DrawTriangle(point_a1, point_b1, point_c1, color, width);
+	ILI9341_DrawTriangle(&point_a, &point_b, &point_c, color, width);
+	ILI9341_DrawTriangle(&point_a1, &point_b1, &point_c1, color, width);
 }
 
+void display_move_pixel(struct point *point_a, uint16_t bg_color, uint16_t color, int pos_x, int pos_y) {
+	ILI9341_DrawPoint(point_a, bg_color);
+	point_a->x = point_a->x + pos_x;
+	point_a->y = point_a->y + pos_y;
+	ILI9341_DrawPoint(point_a, color);
+}
 /* USER CODE END 0 */
 
 /**
@@ -247,6 +253,10 @@ void display_david_star(uint16_t color) {
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+  int start_y = 25;
+  int start_x = ILI9341_WIDTH / 2;
+  struct point A = {20, 20};
+  struct point *point_A = &A;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -277,9 +287,8 @@ int main(void)
   /* USER CODE BEGIN 2 */
   init();
   ILI9341_FillScreen(ILI9341_BLACK);
-
   // Read The ADC Conversion Result & Map It To PWM DutyCycle
-  display_david_star(ILI9341_BLUE);
+//  display_david_star(ILI9341_GREEN, start_x, start_y);
   HAL_TIM_Base_Start_IT(&htim2);
   /* USER CODE END 2 */
 
@@ -661,8 +670,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_7|GPIO_PIN_8
-                          |GPIO_PIN_11, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4|GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_11, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, GPIO_PIN_RESET);
@@ -686,10 +694,14 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PA3 PA4 PA7 PA8
-                           PA11 */
-  GPIO_InitStruct.Pin = GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_7|GPIO_PIN_8
-                          |GPIO_PIN_11;
+  /*Configure GPIO pin : PA3 */
+  GPIO_InitStruct.Pin = GPIO_PIN_3;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PA4 PA7 PA8 PA11 */
+  GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_11;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -701,14 +713,14 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PB2 PB9 */
-  GPIO_InitStruct.Pin = GPIO_PIN_2|GPIO_PIN_9;
+  /*Configure GPIO pins : PB2 PB5 PB9 */
+  GPIO_InitStruct.Pin = GPIO_PIN_2|GPIO_PIN_5|GPIO_PIN_9;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PB3 PB4 PB5 */
-  GPIO_InitStruct.Pin = GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5;
+  /*Configure GPIO pins : PB3 PB4 */
+  GPIO_InitStruct.Pin = GPIO_PIN_3|GPIO_PIN_4;
   GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
@@ -723,12 +735,24 @@ static void MX_GPIO_Init(void)
   /*Configure peripheral I/O remapping */
   __HAL_AFIO_REMAP_SPI1_ENABLE();
 
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI3_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI3_IRQn);
+
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
-
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  if(GPIO_Pin == GPIO_PIN_3) {
+	  ILI9341_WriteString(10, 10, "Pressed LEFT", Font_11x18, ILI9341_RED, ILI9341_BLACK);
+	  ILI9341_FillScreen(ILI9341_BLACK);
+  } else {
+      __NOP();
+  }
+}
 /* USER CODE END 4 */
 
 /**
