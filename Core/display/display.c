@@ -27,7 +27,7 @@ void display_date_and_time() {
 	ILI9341_WriteString(40, 110, time, Font_11x18, ILI9341_BLACK, ILI9341_WHITE);
 }
 
-void display_battery_status() {
+void display_battery_status(int menu_context) {
   char    adc_char[20];
   float   adc_value = 0;
   float   bat_percent = 0;
@@ -36,10 +36,10 @@ void display_battery_status() {
   float   min_voltage = 3.2;
   int     battery_voltage = 4.2;
   int     width = 0;
-  struct  point point_a = {128, 7};
-  struct  point point_b = {152, 7};
-  struct  point point_c = {152, 20};
-  struct  point point_d = {128, 20};
+  struct  point point_a = {140, 10};
+  struct  point point_b = {154, 10};
+  struct  point point_c = {154, 22};
+  struct  point point_d = {140, 22};
 
   HAL_ADC_Start(&hadc2);
   HAL_ADC_PollForConversion(&hadc2, 1);
@@ -50,8 +50,14 @@ void display_battery_status() {
 	  display_bat = 0;
 
   sprintf(adc_char, "%d", display_bat);
-  ILI9341_WriteString(133, 10, adc_char, Font_7x10, ILI9341_BLACK, ILI9341_WHITE);
-  ILI9341_DrawRectangle(&point_a, &point_b, &point_c, &point_d, ILI9341_BLACK, width);
+//  ILI9341_FillRectangle(point_a.x, point_a.y, point_b.x - point_a.x, point_c.y - point_a.y, ILI9341_GREEN);
+  if (!menu_context) {
+	  ILI9341_DrawRectangle(&point_a, &point_b, &point_c, &point_d, ILI9341_BLACK, width);
+	  ILI9341_WriteString(143, 12, adc_char, Font_7x10, ILI9341_BLACK, ILI9341_WHITE);
+  } else {
+	  ILI9341_DrawRectangle(&point_a, &point_b, &point_c, &point_d, ILI9341_WHITE, width);
+	  ILI9341_WriteString(143, 12, adc_char, Font_7x10, ILI9341_WHITE, ILI9341_BLACK);
+  }
   HAL_ADC_Stop(&hadc2);
 }
 
@@ -125,8 +131,6 @@ void display_menu() {
 void display_start_page() {
 	ILI9341_FillScreen(ILI9341_WHITE);
 	// Read The ADC Conversion Result & Map It To PWM DutyCycle
-	HAL_TIM_Base_Start_IT(&htim2);
-	HAL_TIM_Base_Start_IT(&htim1);
 }
 
 void display_bar (int selected_item, int color, int sword_color) {

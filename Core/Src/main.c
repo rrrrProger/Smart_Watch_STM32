@@ -152,7 +152,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		sprintf(time, "%02d:%02d:%02d", sTime.Hours, sTime.Minutes, sTime.Seconds);
 		display_date_and_time();
 	} else if (htim->Instance == TIM1) {
-		display_battery_status();
+		display_battery_status(menu_context);
 	}
 }
 
@@ -200,6 +200,8 @@ int main(void)
   /* USER CODE BEGIN 2 */
   init();
   display_start_page();
+  HAL_TIM_Base_Start_IT(&htim2);
+  HAL_TIM_Base_Start_IT(&htim1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
