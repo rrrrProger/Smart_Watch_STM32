@@ -144,13 +144,16 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	RTC_DateTypeDef sDate = {0};
 	enum WEEKDAY {MONDAY = 1, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY};
 
-	HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
-	HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
-	dat = get_week_day(sDate.WeekDay);
-	sprintf(date, "%s %02d/%02d/%02d", dat, sDate.Date, sDate.Month, sDate.Year);
-	sprintf(time, "%02d:%02d:%02d", sTime.Hours, sTime.Minutes, sTime.Seconds);
-	display_date_and_time();
-	display_battery_status();
+	if (htim->Instance == TIM2) {
+		HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
+		HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
+		dat = get_week_day(sDate.WeekDay);
+		sprintf(date, "%s %02d/%02d/%02d", dat, sDate.Date, sDate.Month, sDate.Year);
+		sprintf(time, "%02d:%02d:%02d", sTime.Hours, sTime.Minutes, sTime.Seconds);
+		display_date_and_time();
+	} else if (htim->Instance == TIM1) {
+		display_battery_status();
+	}
 }
 
 void init() {

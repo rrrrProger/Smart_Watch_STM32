@@ -8,6 +8,7 @@ extern char time[30];
 extern char date[30];
 extern ADC_HandleTypeDef hadc2;
 extern TIM_HandleTypeDef htim2;
+extern TIM_HandleTypeDef htim1;
 
 struct item {
 	int x;
@@ -125,6 +126,7 @@ void display_start_page() {
 	ILI9341_FillScreen(ILI9341_WHITE);
 	// Read The ADC Conversion Result & Map It To PWM DutyCycle
 	HAL_TIM_Base_Start_IT(&htim2);
+	HAL_TIM_Base_Start_IT(&htim1);
 }
 
 void display_bar (int selected_item, int color, int sword_color) {
