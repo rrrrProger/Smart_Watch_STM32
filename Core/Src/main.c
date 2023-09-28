@@ -133,8 +133,8 @@ char time[30] = {0};
 char date[30] = {0};
 
 void display_date_and_time() {
-	ILI9341_WriteString(40, 10, date, Font_7x10, ILI9341_GREEN, ILI9341_BLACK);
-	ILI9341_WriteString(40, 104, time, Font_11x18, ILI9341_WHITE, ILI9341_BLACK);
+	ILI9341_WriteString(40, 10, date, Font_7x10, ILI9341_BLACK, ILI9341_WHITE);
+	ILI9341_WriteString(40, 110, time, Font_11x18, ILI9341_BLACK, ILI9341_WHITE);
 }
 
 void display_battery_status() {
@@ -160,9 +160,61 @@ void display_battery_status() {
 	  display_bat = 0;
 
   sprintf(adc_char, "%d", display_bat);
-  ILI9341_WriteString(133, 10, adc_char, Font_7x10, ILI9341_RED, ILI9341_BLACK);
-  ILI9341_DrawRectangle(&point_a, &point_b, &point_c, &point_d, ILI9341_RED, width);
+  ILI9341_WriteString(133, 10, adc_char, Font_7x10, ILI9341_BLACK, ILI9341_WHITE);
+  ILI9341_DrawRectangle(&point_a, &point_b, &point_c, &point_d, ILI9341_BLACK, width);
   HAL_ADC_Stop(&hadc2);
+}
+
+void display_move_pixel(struct point *point_a, uint16_t bg_color, uint16_t color, int pos_x, int pos_y) {
+	ILI9341_DrawPoint(point_a, bg_color);
+	point_a->x = point_a->x + pos_x;
+	point_a->y = point_a->y + pos_y;
+	ILI9341_DrawPoint(point_a, color);
+}
+
+void display_move_line() {
+	;
+}
+
+void display_ground() {
+	struct point point_hor_start = {0, 80};
+	struct point point_hor_end = {ILI9341_WIDTH, 80};
+	struct point point_surface_start = {10, 80};
+	struct point point_surface_end = {4, 85};
+	int i;
+	int i_end = ILI9341_WIDTH - 15;
+
+	ILI9341_DrawLine(&point_hor_start, &point_hor_end, ILI9341_BLACK, 0);
+	for (i = ILI9341_WIDTH; i > i_end; i = i - 15) {
+		struct point *point_s = (struct point *)malloc(sizeof(struct point));
+		struct point *point_e = (struct point *)malloc(sizeof(struct point));
+		if (point_s) {
+			point_s->x = i;
+			point_s->y = 80;
+		}
+		if (point_e) {
+			point_e->x = i - 10;
+			point_e->y = 95;
+		}
+		if (point_s) {
+			free(point_s);
+		}
+		if (point_e) {
+			free(point_e);
+		}
+
+	}
+}
+
+void display_man() {
+	struct point point_leg_left_s = {};
+	struct point point_leg_left_e = {};
+	struct point point_leg_right_s = {};
+	struct point point_leg_right_e = {};
+	struct point point_wrist_s = {};
+	struct point point_wrist_e = {};
+	struct point point_head_center = {};
+	int head_radius = 5;
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
@@ -186,39 +238,6 @@ void init() {
     ILI9341_Init();
 }
 
-
-
-void read_menu(uint8_t key) {
-	enum KEY { LEFT, RIGHT, BOTTOM };
-	switch(key) {
-		case LEFT:
-			ILI9341_WriteString(10, 10, "Pressed LEFT", Font_11x18, ILI9341_RED, ILI9341_BLACK);
-			HAL_Delay(500);
-			ILI9341_FillScreen(ILI9341_BLACK);
-			break;
-		case RIGHT:
-			ILI9341_WriteString(10, 10, "Pressed RIGHT", Font_11x18, ILI9341_RED, ILI9341_BLACK);
-			HAL_Delay(500);
-			ILI9341_FillScreen(ILI9341_BLACK);
-			break;
-		case BOTTOM:
-			ILI9341_WriteString(10, 10, "Pressed BOTTOM", Font_11x18, ILI9341_RED, ILI9341_BLACK);
-			HAL_Delay(500);
-			ILI9341_FillScreen(ILI9341_BLACK);
-			break;
-	}
-}
-
-void check_menu(){
-  enum KEY {LEFT, RIGHT, BOTTOM};
-  if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_3) == GPIO_PIN_RESET) {
-	  read_menu(LEFT);
-  }
-  if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_12) == GPIO_PIN_RESET) {
-	  read_menu(RIGHT);
-  }
-}
-
 void display_david_star(uint16_t color, int start_x, int start_y) {
 	int star_width = 30;
 	int star_height = 50;
@@ -237,13 +256,6 @@ void display_david_star(uint16_t color, int start_x, int start_y) {
 	ILI9341_DrawTriangle(&point_a, &point_b, &point_c, color, width);
 	ILI9341_DrawTriangle(&point_a1, &point_b1, &point_c1, color, width);
 }
-
-void display_move_pixel(struct point *point_a, uint16_t bg_color, uint16_t color, int pos_x, int pos_y) {
-	ILI9341_DrawPoint(point_a, bg_color);
-	point_a->x = point_a->x + pos_x;
-	point_a->y = point_a->y + pos_y;
-	ILI9341_DrawPoint(point_a, color);
-}
 /* USER CODE END 0 */
 
 /**
@@ -253,10 +265,6 @@ void display_move_pixel(struct point *point_a, uint16_t bg_color, uint16_t color
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-  int start_y = 25;
-  int start_x = ILI9341_WIDTH / 2;
-  struct point A = {20, 20};
-  struct point *point_A = &A;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -286,10 +294,11 @@ int main(void)
   MX_ADC2_Init();
   /* USER CODE BEGIN 2 */
   init();
-  ILI9341_FillScreen(ILI9341_BLACK);
+  ILI9341_FillScreen(ILI9341_WHITE);
   // Read The ADC Conversion Result & Map It To PWM DutyCycle
 //  display_david_star(ILI9341_GREEN, start_x, start_y);
-//  HAL_TIM_Base_Start_IT(&htim2);
+  HAL_TIM_Base_Start_IT(&htim2);
+//  display_ground();
   /* USER CODE END 2 */
 
   /* Infinite loop */
