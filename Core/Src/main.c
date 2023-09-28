@@ -22,6 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "st7735.h"
+#include "display.h"
 #include "fonts.h"
 #include <stdio.h>
 #include "touch.h"
@@ -34,6 +35,10 @@
 int iteration = 0;
 int last_beat = 0;
 int delays[20];
+int pressed_left = 0;
+int pressed_right = 0;
+int menu_context = 0;
+int selected_item = 1;
 
 char *get_week_day(int day) {
 	enum WEEKDAY {MONDAY = 1, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY};
@@ -132,91 +137,6 @@ static void MX_ADC2_Init(void);
 char time[30] = {0};
 char date[30] = {0};
 
-void display_date_and_time() {
-	ILI9341_WriteString(40, 10, date, Font_7x10, ILI9341_BLACK, ILI9341_WHITE);
-	ILI9341_WriteString(40, 110, time, Font_11x18, ILI9341_BLACK, ILI9341_WHITE);
-}
-
-void display_battery_status() {
-  char    adc_char[20];
-  float   adc_value = 0;
-  float   bat_percent = 0;
-  int     display_bat = 0;
-  float   supply_voltage = 3.28;
-  float   min_voltage = 3.2;
-  int     battery_voltage = 4.2;
-  int     width = 0;
-  struct  point point_a = {128, 7};
-  struct  point point_b = {152, 7};
-  struct  point point_c = {152, 20};
-  struct  point point_d = {128, 20};
-
-  HAL_ADC_Start(&hadc2);
-  HAL_ADC_PollForConversion(&hadc2, 1);
-  adc_value = HAL_ADC_GetValue(&hadc2);
-  bat_percent = adc_value / 4095;
-  display_bat = bat_percent * supply_voltage * 2 * 100 - min_voltage * 100;
-  if (display_bat < 0)
-	  display_bat = 0;
-
-  sprintf(adc_char, "%d", display_bat);
-  ILI9341_WriteString(133, 10, adc_char, Font_7x10, ILI9341_BLACK, ILI9341_WHITE);
-  ILI9341_DrawRectangle(&point_a, &point_b, &point_c, &point_d, ILI9341_BLACK, width);
-  HAL_ADC_Stop(&hadc2);
-}
-
-void display_move_pixel(struct point *point_a, uint16_t bg_color, uint16_t color, int pos_x, int pos_y) {
-	ILI9341_DrawPoint(point_a, bg_color);
-	point_a->x = point_a->x + pos_x;
-	point_a->y = point_a->y + pos_y;
-	ILI9341_DrawPoint(point_a, color);
-}
-
-void display_move_line() {
-	;
-}
-
-void display_ground() {
-	struct point point_hor_start = {0, 80};
-	struct point point_hor_end = {ILI9341_WIDTH, 80};
-	struct point point_surface_start = {10, 80};
-	struct point point_surface_end = {4, 85};
-	int i;
-	int i_end = ILI9341_WIDTH - 15;
-
-	ILI9341_DrawLine(&point_hor_start, &point_hor_end, ILI9341_BLACK, 0);
-	for (i = ILI9341_WIDTH; i > i_end; i = i - 15) {
-		struct point *point_s = (struct point *)malloc(sizeof(struct point));
-		struct point *point_e = (struct point *)malloc(sizeof(struct point));
-		if (point_s) {
-			point_s->x = i;
-			point_s->y = 80;
-		}
-		if (point_e) {
-			point_e->x = i - 10;
-			point_e->y = 95;
-		}
-		if (point_s) {
-			free(point_s);
-		}
-		if (point_e) {
-			free(point_e);
-		}
-
-	}
-}
-
-void display_man() {
-	struct point point_leg_left_s = {};
-	struct point point_leg_left_e = {};
-	struct point point_leg_right_s = {};
-	struct point point_leg_right_e = {};
-	struct point point_wrist_s = {};
-	struct point point_wrist_e = {};
-	struct point point_head_center = {};
-	int head_radius = 5;
-}
-
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	char *dat;
@@ -238,24 +158,6 @@ void init() {
     ILI9341_Init();
 }
 
-void display_david_star(uint16_t color, int start_x, int start_y) {
-	int star_width = 30;
-	int star_height = 50;
-	int star_distance = 67;
-
-	int width = 1;
-
-	struct point point_a = {start_x, start_y};
-	struct point point_b = {start_x - star_width, start_y + star_height};
-	struct point point_c = {start_x + star_width, start_y + star_height};
-
-	struct point point_a1 = {start_x, start_y + star_distance};
-	struct point point_b1 = {start_x - star_width, start_y + star_distance - star_height};
-	struct point point_c1 = {start_x + star_width, start_y + star_distance - star_height};
-
-	ILI9341_DrawTriangle(&point_a, &point_b, &point_c, color, width);
-	ILI9341_DrawTriangle(&point_a1, &point_b1, &point_c1, color, width);
-}
 /* USER CODE END 0 */
 
 /**
@@ -294,11 +196,7 @@ int main(void)
   MX_ADC2_Init();
   /* USER CODE BEGIN 2 */
   init();
-  ILI9341_FillScreen(ILI9341_WHITE);
-  // Read The ADC Conversion Result & Map It To PWM DutyCycle
-//  display_david_star(ILI9341_GREEN, start_x, start_y);
-  HAL_TIM_Base_Start_IT(&htim2);
-//  display_ground();
+  display_start_page();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -761,14 +659,39 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-	if(GPIO_Pin == GPIO_PIN_5) {
-		ILI9341_WriteString(10, 10, "Pressed RIGHT", Font_11x18, ILI9341_RED, ILI9341_BLACK);
-	 } else if(GPIO_Pin == GPIO_PIN_3){
-		 ILI9341_WriteString(10, 10, "Pressed LEFT", Font_11x18, ILI9341_RED, ILI9341_BLACK);
-	 } else {
-		 __NOP();
-	 }
-	 ILI9341_FillScreen(ILI9341_BLACK);
+	uint16_t selected_pin = GPIO_Pin;
+	uint16_t right = GPIO_PIN_5;
+	uint16_t left = GPIO_PIN_3;
+	int menu_pressed_counter = 0;
+
+	if(selected_pin == right && !pressed_right && !menu_context) { 	//Pressed RIGHT
+		HAL_TIM_Base_Stop_IT(&htim2);
+		display_menu();
+		menu_context = 1;
+		return;
+	} else if(selected_pin == left && !pressed_left && menu_context) { //Pressed LEFT
+		HAL_TIM_Base_Start_IT(&htim2);
+		display_start_page();
+		menu_context = 0;
+		return;
+	}
+
+	pressed_right = !pressed_right;
+	pressed_left = !pressed_left;
+
+	if (menu_context && !pressed_right) {
+		if (selected_pin == right) {
+			if (selected_item == 1) {
+				display_bar(ITEMS_NUMBER, ILI9341_BLACK, ILI9341_BLACK);
+				display_bar(selected_item, ILI9341_WHITE, ILI9341_RED);
+			}
+			else {
+				display_bar(selected_item - 1, ILI9341_BLACK, ILI9341_BLACK);
+				display_bar(selected_item, ILI9341_WHITE, ILI9341_RED);
+			}
+			selected_item = selected_item < ITEMS_NUMBER ? selected_item + 1 : 1;
+		}
+	}
 }
 /* USER CODE END 4 */
 
