@@ -248,6 +248,7 @@ void ILI9341_DrawLine(struct point *point_a, struct point *point_b, uint16_t col
 void ILI9341_DrawTriangle(struct point *point_a, struct point *point_b, struct point *point_c, uint16_t color, int width);
 void ILI9341_DrawCircle(struct point center, int radius);
 void ILI9341_DrawRectangle(struct point *point_a, struct point *point_b, struct point *point_c, struct point *point_d, uint16_t color, int width);
+void ILI9341_DrawEllipse();
 void ILI9341_DrawPixel(uint16_t x, uint16_t y, uint16_t color);
 void ILI9341_WriteString(uint16_t x, uint16_t y, const char* str, FontDef font, uint16_t color, uint16_t bgcolor);
 void ILI9341_FillRectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color);

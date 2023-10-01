@@ -3,6 +3,7 @@
 #include "st7735.h"
 #include <stdlib.h>
 #include "stm32f1xx_hal.h"
+#include <math.h>
 
 extern char time[30];
 extern char date[30];
@@ -30,33 +31,38 @@ void display_date_and_time() {
 void display_battery_status(int menu_context) {
   char    adc_char[20];
   float   adc_value = 0;
-  float   bat_percent = 0;
+  float   bat_percent = 0.0;
   int     display_bat = 0;
   float   supply_voltage = 3.28;
   float   min_voltage = 3.2;
+  float   display_bat_float = 0;
   int     battery_voltage = 4.2;
   int     width = 0;
-  struct  point point_a = {140, 10};
-  struct  point point_b = {154, 10};
-  struct  point point_c = {154, 22};
-  struct  point point_d = {140, 22};
+  int 	  offset = 2;
+  struct  point point_a = {127, 8};
+  struct  point point_b = {157, 8};
+  struct  point point_c = {157, 22};
+  struct  point point_d = {127, 22};
 
   HAL_ADC_Start(&hadc2);
   HAL_ADC_PollForConversion(&hadc2, 1);
   adc_value = HAL_ADC_GetValue(&hadc2);
   bat_percent = adc_value / 4095;
-  display_bat = bat_percent * supply_voltage * 2 * 100 - min_voltage * 100;
+  display_bat_float = bat_percent * supply_voltage * 2.08;
+  display_bat_float = ceilf(display_bat_float * 100) / 100;
+//  display_bat_float = bat_percent * supply_voltage * 2.08;
+  display_bat = ceil(display_bat_float);
   if (display_bat < 0)
 	  display_bat = 0;
 
-  sprintf(adc_char, "%d", display_bat);
+  sprintf(adc_char, "%.2f", display_bat_float);
 //  ILI9341_FillRectangle(point_a.x, point_a.y, point_b.x - point_a.x, point_c.y - point_a.y, ILI9341_GREEN);
   if (!menu_context) {
 	  ILI9341_DrawRectangle(&point_a, &point_b, &point_c, &point_d, ILI9341_BLACK, width);
-	  ILI9341_WriteString(143, 12, adc_char, Font_7x10, ILI9341_BLACK, ILI9341_WHITE);
+	  ILI9341_WriteString(point_a.x + offset, point_a.y + offset, adc_char, Font_7x10, ILI9341_BLACK, ILI9341_WHITE);
   } else {
 	  ILI9341_DrawRectangle(&point_a, &point_b, &point_c, &point_d, ILI9341_WHITE, width);
-	  ILI9341_WriteString(143, 12, adc_char, Font_7x10, ILI9341_WHITE, ILI9341_BLACK);
+	  ILI9341_WriteString(point_a.x + offset, point_a.y + offset, adc_char, Font_7x10, ILI9341_WHITE, ILI9341_BLACK);
   }
   HAL_ADC_Stop(&hadc2);
 }
