@@ -200,6 +200,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   init();
   display_start_page();
+  display_ateist_man();
   HAL_TIM_Base_Start_IT(&htim2);
   HAL_TIM_Base_Start_IT(&htim1);
   /* USER CODE END 2 */

@@ -3,6 +3,31 @@
 #include "st7735.h"
 #include <math.h>
 
+static void Draw_Point_with_width(int x, int y, int color, int width) {
+	if (width != 0 )
+		for (int j = 0; j < width; j++) {
+			ILI9341_DrawPixel(round(x), round(y), color);
+			ILI9341_DrawPixel(round(x) - width, round(y), color);
+			ILI9341_DrawPixel(round(x) + width, round(y), color);
+			ILI9341_DrawPixel(round(x), round(y) - width, color);
+			ILI9341_DrawPixel(round(x), round(y) + width, color);
+		}
+	else
+		ILI9341_DrawPixel(round(x), round(y), color);
+}
+
+static void draw_Circle(int xc, int yc, int x, int y, int color, int width)
+{
+	Draw_Point_with_width(xc+x, yc+y, color, width);
+	Draw_Point_with_width(xc-x, yc+y, color, width);
+	Draw_Point_with_width(xc+x, yc-y, color, width);
+    Draw_Point_with_width(xc-x, yc-y, color, width);
+    Draw_Point_with_width(xc+y, yc+x, color, width);
+    Draw_Point_with_width(xc-y, yc+x, color, width);
+    Draw_Point_with_width(xc+y, yc-x, color, width);
+    Draw_Point_with_width(xc-y, yc-x, color, width);
+}
+
 static void ILI9341_Select() {
     HAL_GPIO_WritePin(ILI9341_CS_GPIO_Port, ILI9341_CS_Pin, GPIO_PIN_RESET);
 }
@@ -350,10 +375,31 @@ void ILI9341_DrawRectangle(struct point *point_a, struct point *point_b, struct 
 	ILI9341_DrawLine(point_d, point_a, color, width);
 }
 
-void ILI9341_DrawCircle(struct point center, int radius) {
-	;
+void ILI9341_DrawCircle(struct point *center, int radius, int color, int width) {
+    int x = 0, y = radius;
+    int d = 3 - 2 * radius;
+    draw_Circle(center->x, center->y, x, y, color, width);
+    while (y >= x)
+    {
+        // for each pixel we will
+        // draw all eight pixels
+
+        x++;
+
+        // check for decision parameter
+        // and correspondingly
+        // update d, x, y
+        if (d > 0)
+        {
+            y--;
+            d = d + 4 * (x - y) + 10;
+        }
+        else
+            d = d + 4 * x + 6;
+        draw_Circle(center->x, center->y, x, y, color, width);
+    }
 }
-void ILI9341_DrawEllipse(int rx, int ry, int xc, int yc) {
+void ILI9341_DrawEllipse(int rx, int ry, int xc, int yc, int color) {
 	float dx, dy, d1, d2, x, y;
 	x = 0;
 	y = ry;
@@ -373,7 +419,10 @@ void ILI9341_DrawEllipse(int rx, int ry, int xc, int yc) {
 //		printf("(%f, %f)\n", -x + xc, y + yc);
 //		printf("(%f, %f)\n", x + xc, -y + yc);
 //		printf("(%f, %f)\n", -x + xc, -y + yc);
-
+		ILI9341_DrawPixel((int)(x + xc), (int)(y + yc), color);
+		ILI9341_DrawPixel((int)(-x + xc), (int)(y + yc), color);
+		ILI9341_DrawPixel((int)(x + xc), (int)(-y + yc), color);
+		ILI9341_DrawPixel((int)(-x + xc), (int)(-y + yc), color);
 		// Checking and updating value of
 		// decision parameter based on algorithm
 		if (d1 < 0) {
@@ -403,7 +452,10 @@ void ILI9341_DrawEllipse(int rx, int ry, int xc, int yc) {
 //		printf("(%f, %f)\n", -x + xc, y + yc);
 //		printf("(%f, %f)\n", x + xc, -y + yc);
 //		printf("(%f, %f)\n", -x + xc, -y + yc);
-
+		ILI9341_DrawPixel((int)(x + xc), (int)(y + yc), color);
+		ILI9341_DrawPixel((int)(-x + xc), (int)(y + yc), color);
+		ILI9341_DrawPixel((int)(x + xc), (int)(-y + yc), color);
+		ILI9341_DrawPixel((int)(-x + xc), (int)(-y + yc), color);
 		// Checking and updating parameter
 		// value based on algorithm
 		if (d2 > 0) {

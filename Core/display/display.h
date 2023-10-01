@@ -8,5 +8,6 @@ void display_man();
 void display_menu();
 void display_start_page();
 void display_bar(int selected_item, int color, int sword_color);
+void display_ateist_man();
 
 #define ITEMS_NUMBER 2

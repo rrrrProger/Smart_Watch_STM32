@@ -23,6 +23,35 @@ struct item items[] = {
 		{30, 40, "Wifi connect", 0},
 };
 
+static void display_sword(int x, int y, int color, int width) {
+	int sword_width_distance_top = 4;
+	int sword_height_distance_top = 12;
+	int sword_width_distance_bottom = 5;
+	int sword_height_distance_bottom = 5;
+	int sword_line_width = 15;
+	int sword_line_height = 40;
+
+	struct point sword_a = {x, y};
+	struct point sword_b = {x + sword_width_distance_top, y - sword_height_distance_top};
+	struct point sword_c = {x + sword_width_distance_top + sword_width_distance_bottom, y - sword_height_distance_top + sword_height_distance_bottom};
+	struct point sword_d = {x + sword_width_distance_bottom, y + sword_height_distance_bottom};
+
+	struct point sword_line_point_a0 = {sword_a.x + sword_width_distance_top / 3, sword_a.y - sword_height_distance_top / 3};
+	struct point sword_line_point_a1 = {sword_d.x + sword_width_distance_top / 3, sword_d.y - sword_height_distance_top / 3};
+
+	struct point sword_line_point_b0 = {sword_a.x + 2 * sword_width_distance_top / 3, sword_a.y - 2 * sword_height_distance_top / 3};
+	struct point sword_line_point_b1 = {sword_d.x + 2 * sword_width_distance_top / 3, sword_d.y - 2 * sword_height_distance_top / 3};
+
+	struct point point_a = {sword_b.x + sword_width_distance_bottom / 2, sword_b.y + sword_height_distance_bottom / 2};
+	struct point point_b = {sword_b.x + sword_width_distance_bottom / 2 + sword_line_width, sword_b.y + sword_height_distance_bottom / 2 - sword_line_height};
+
+	ILI9341_DrawRectangle(&sword_a, &sword_b, &sword_c, &sword_d, color, width);
+	ILI9341_DrawLine(&sword_line_point_a0, &sword_line_point_a1, color, width);
+	ILI9341_DrawLine(&sword_line_point_b0, &sword_line_point_b1, color, width);
+	//Sword body line
+	ILI9341_DrawLine(&point_a, &point_b, ILI9341_RED, 1);
+}
+
 void display_date_and_time() {
 	ILI9341_WriteString(40, 10, date, Font_7x10, ILI9341_BLACK, ILI9341_WHITE);
 	ILI9341_WriteString(40, 110, time, Font_11x18, ILI9341_BLACK, ILI9341_WHITE);
@@ -103,8 +132,40 @@ void display_ground() {
 	}
 }
 
-void display_vader() {
-	;
+void display_ateist_man() {
+	int leg_start_x = ILI9341_WIDTH / 2;
+	int leg_start_y = ILI9341_HEIGHT / 2 + 10;
+	int leg_width = 10;
+	int leg_length = 20;
+	int body_length = 20;
+	int hand_width = 10;
+	int hand_length = 20;
+	int neck_length = 5;
+	int head_radius = 7;
+	int hat_height   = 5;
+	int hat_width   = 7;
+	struct point leg_l_start = {leg_start_x, leg_start_y};
+	struct point leg_l_end   = {leg_start_x - leg_width, leg_start_y + leg_length};
+	struct point leg_r_end   = {leg_start_x + leg_width, leg_start_y + leg_length};
+	struct point body_end    = {leg_start_x, leg_start_y - body_length};
+	struct point hand_l_end  = {leg_start_x - hand_width, leg_start_y - body_length + hand_length};
+	struct point hand_r_end  = {leg_start_x + hand_width, leg_start_y - body_length + hand_length};
+	struct point neck_end    = {leg_start_x, leg_start_y - body_length - neck_length};
+	struct point head_center = {leg_start_x, leg_start_y - body_length - neck_length - head_radius};
+	struct point hat_coord_l  = {leg_start_x - hat_width, leg_start_y - body_length - neck_length - 2 * head_radius};
+	struct point hat_coord_r  = {leg_start_x + hat_width, leg_start_y - body_length - neck_length - 2 * head_radius};
+	struct point hat_coord_t  = {leg_start_x, leg_start_y - body_length - neck_length - head_radius - 2 * head_radius - hat_height};
+
+	ILI9341_DrawLine(&leg_l_start, &leg_l_end, ILI9341_BLACK, 1);
+	ILI9341_DrawLine(&leg_l_start, &leg_r_end, ILI9341_BLACK, 1);
+	ILI9341_DrawLine(&leg_l_start, &body_end, ILI9341_BLACK, 1);
+	ILI9341_DrawLine(&body_end, &hand_l_end, ILI9341_BLACK, 1);
+	ILI9341_DrawLine(&body_end, &hand_r_end, ILI9341_BLACK, 1);
+	ILI9341_DrawLine(&body_end, &neck_end, ILI9341_BLACK, 1);
+	ILI9341_DrawCircle(&head_center, head_radius, ILI9341_BLACK, 1);
+	ILI9341_DrawTriangle(&hat_coord_l, &hat_coord_t, &hat_coord_r, ILI9341_BLACK, 1);
+
+	display_sword(hand_r_end.x, hand_r_end.y, ILI9341_BLACK, 1);
 }
 
 void display_david_star(uint16_t color, int start_x, int start_y) {
