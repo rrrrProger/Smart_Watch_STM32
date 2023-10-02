@@ -23,7 +23,7 @@ struct item items[] = {
 		{30, 40, "Wifi connect", 0},
 };
 
-static void display_sword(int x, int y, int color, int width) {
+static void display_sword(int x, int y, int color, int sword_color, int width) {
 	int sword_width_distance_top = 4;
 	int sword_height_distance_top = 12;
 	int sword_width_distance_bottom = 5;
@@ -49,12 +49,18 @@ static void display_sword(int x, int y, int color, int width) {
 	ILI9341_DrawLine(&sword_line_point_a0, &sword_line_point_a1, color, width);
 	ILI9341_DrawLine(&sword_line_point_b0, &sword_line_point_b1, color, width);
 	//Sword body line
-	ILI9341_DrawLine(&point_a, &point_b, ILI9341_RED, 1);
+	ILI9341_DrawLine(&point_a, &point_b, sword_color, 1);
+}
+
+static void display_skateboard(struct point points[], struct point wheel_points[], int radius, int color, int width) {
+	ILI9341_DrawRectangle(&points[0], &points[1], &points[2], &points[3], ILI9341_BLACK, 1);
+	ILI9341_DrawCircle(&wheel_points[0], radius, color, width);
+	ILI9341_DrawCircle(&wheel_points[1], radius, color, width);
 }
 
 void display_date_and_time() {
 	ILI9341_WriteString(40, 10, date, Font_7x10, ILI9341_BLACK, ILI9341_WHITE);
-	ILI9341_WriteString(40, 110, time, Font_11x18, ILI9341_BLACK, ILI9341_WHITE);
+	ILI9341_WriteString(ILI9341_WIDTH / 2 - 27, ILI9341_HEIGHT - 10, time, Font_7x10, ILI9341_BLACK, ILI9341_WHITE);
 }
 
 void display_battery_status(int menu_context) {
@@ -144,6 +150,11 @@ void display_ateist_man() {
 	int head_radius = 7;
 	int hat_height   = 5;
 	int hat_width   = 7;
+	int skateboard_len = 30;
+	int skateboard_height = 5;
+	int skateboard_offset = 5;
+	int wheel_radius = 5;
+
 	struct point leg_l_start = {leg_start_x, leg_start_y};
 	struct point leg_l_end   = {leg_start_x - leg_width, leg_start_y + leg_length};
 	struct point leg_r_end   = {leg_start_x + leg_width, leg_start_y + leg_length};
@@ -155,6 +166,16 @@ void display_ateist_man() {
 	struct point hat_coord_l  = {leg_start_x - hat_width, leg_start_y - body_length - neck_length - 2 * head_radius};
 	struct point hat_coord_r  = {leg_start_x + hat_width, leg_start_y - body_length - neck_length - 2 * head_radius};
 	struct point hat_coord_t  = {leg_start_x, leg_start_y - body_length - neck_length - head_radius - 2 * head_radius - hat_height};
+	struct point skateboard_points[] = {
+			{leg_start_x - skateboard_len, leg_start_y + leg_length},
+			{leg_start_x + skateboard_len, leg_start_y + leg_length},
+			{leg_start_x + skateboard_len, leg_start_y + skateboard_height + leg_length},
+			{leg_start_x - skateboard_len, leg_start_y + skateboard_height + leg_length}
+	};
+	struct point wheel_points[] = {
+			{leg_start_x - skateboard_len + skateboard_offset, leg_start_y + leg_length + wheel_radius + skateboard_height},
+			{leg_start_x + skateboard_len - skateboard_offset, leg_start_y + leg_length + wheel_radius + skateboard_height}
+	};
 
 	ILI9341_DrawLine(&leg_l_start, &leg_l_end, ILI9341_BLACK, 1);
 	ILI9341_DrawLine(&leg_l_start, &leg_r_end, ILI9341_BLACK, 1);
@@ -165,7 +186,8 @@ void display_ateist_man() {
 	ILI9341_DrawCircle(&head_center, head_radius, ILI9341_BLACK, 1);
 	ILI9341_DrawTriangle(&hat_coord_l, &hat_coord_t, &hat_coord_r, ILI9341_BLACK, 1);
 
-	display_sword(hand_r_end.x, hand_r_end.y, ILI9341_BLACK, 1);
+	display_sword(hand_r_end.x, hand_r_end.y, ILI9341_BLACK, ILI9341_GREEN, 1);
+	display_skateboard(skateboard_points, wheel_points, wheel_radius, ILI9341_BLACK, 1);
 }
 
 void display_david_star(uint16_t color, int start_x, int start_y) {
