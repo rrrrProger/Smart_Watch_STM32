@@ -10,6 +10,7 @@ extern char date[30];
 extern ADC_HandleTypeDef hadc2;
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim1;
+extern struct global gl;
 
 struct item {
 	int x;
@@ -23,27 +24,24 @@ struct item items[] = {
 		{30, 40, "Wifi connect", 0},
 };
 
-void display_sword(int x, int y, int color, int sword_color, int width) {
-	int sword_width_distance_top = 4;
-	int sword_height_distance_top = 12;
-	int sword_width_distance_bottom = 5;
-	int sword_height_distance_bottom = 5;
-	int sword_line_width = 15;
-	int sword_line_height = 40;
+void display_sword(int color, int sword_color, int width) {
+	int x = gl.leg_start_x + gl.hand_width;
+	int y = gl.leg_start_y - gl.body_length + gl.hand_length;
 
 	struct point sword_a = {x, y};
-	struct point sword_b = {x + sword_width_distance_top, y - sword_height_distance_top};
-	struct point sword_c = {x + sword_width_distance_top + sword_width_distance_bottom, y - sword_height_distance_top + sword_height_distance_bottom};
-	struct point sword_d = {x + sword_width_distance_bottom, y + sword_height_distance_bottom};
+	struct point sword_b = {x + gl.sword_width_distance_top, y - gl.sword_height_distance_top};
+	struct point sword_c = {x + gl.sword_width_distance_top + gl.sword_width_distance_bottom, y - gl.sword_height_distance_top + gl.sword_height_distance_bottom};
+	struct point sword_d = {x + gl.sword_width_distance_bottom, y + gl.sword_height_distance_bottom};
 
-	struct point sword_line_point_a0 = {sword_a.x + sword_width_distance_top / 3, sword_a.y - sword_height_distance_top / 3};
-	struct point sword_line_point_a1 = {sword_d.x + sword_width_distance_top / 3, sword_d.y - sword_height_distance_top / 3};
+	struct point sword_line_point_a0 = {sword_a.x + gl.sword_width_distance_top / 3, sword_a.y - gl.sword_height_distance_top / 3};
+	struct point sword_line_point_a1 = {sword_d.x + gl.sword_width_distance_top / 3, sword_d.y - gl.sword_height_distance_top / 3};
 
-	struct point sword_line_point_b0 = {sword_a.x + 2 * sword_width_distance_top / 3, sword_a.y - 2 * sword_height_distance_top / 3};
-	struct point sword_line_point_b1 = {sword_d.x + 2 * sword_width_distance_top / 3, sword_d.y - 2 * sword_height_distance_top / 3};
+	struct point sword_line_point_b0 = {sword_a.x + 2 * gl.sword_width_distance_top / 3, sword_a.y - 2 * gl.sword_height_distance_top / 3};
+	struct point sword_line_point_b1 = {sword_d.x + 2 * gl.sword_width_distance_top / 3, sword_d.y - 2 * gl.sword_height_distance_top / 3};
 
-	struct point point_a = {sword_b.x + sword_width_distance_bottom / 2, sword_b.y + sword_height_distance_bottom / 2};
-	struct point point_b = {sword_b.x + sword_width_distance_bottom / 2 + sword_line_width, sword_b.y + sword_height_distance_bottom / 2 - sword_line_height};
+	struct point point_a = {sword_b.x + gl.sword_width_distance_bottom / 2, sword_b.y + gl.sword_height_distance_bottom / 2};
+	struct point point_b = {sword_b.x + gl.sword_width_distance_bottom / 2 + gl.sword_line_width, sword_b.y + gl.sword_height_distance_bottom / 2 - gl.sword_line_height};
+
 
 	ILI9341_DrawRectangle(&sword_a, &sword_b, &sword_c, &sword_d, color, width);
 	ILI9341_DrawLine(&sword_line_point_a0, &sword_line_point_a1, color, width);
@@ -59,8 +57,8 @@ static void display_skateboard(struct point points[], struct point wheel_points[
 }
 
 void display_date_and_time() {
-	ILI9341_WriteString(40, 10, date, Font_7x10, ILI9341_BLACK, ILI9341_WHITE);
-	ILI9341_WriteString(ILI9341_WIDTH / 2 - 27, ILI9341_HEIGHT - 10, time, Font_7x10, ILI9341_BLACK, ILI9341_WHITE);
+	ILI9341_WriteString(40, 10, date, Font_7x10, gl.item_color, gl.theme_color);
+	ILI9341_WriteString(ILI9341_WIDTH / 2 - 27, ILI9341_HEIGHT - 10, time, Font_7x10, gl.item_color, gl.theme_color);
 }
 
 void display_battery_status(int menu_context) {
@@ -93,11 +91,11 @@ void display_battery_status(int menu_context) {
   sprintf(adc_char, "%.2f", display_bat_float);
 //  ILI9341_FillRectangle(point_a.x, point_a.y, point_b.x - point_a.x, point_c.y - point_a.y, ILI9341_GREEN);
   if (!menu_context) {
-	  ILI9341_DrawRectangle(&point_a, &point_b, &point_c, &point_d, ILI9341_BLACK, width);
-	  ILI9341_WriteString(point_a.x + offset, point_a.y + offset, adc_char, Font_7x10, ILI9341_BLACK, ILI9341_WHITE);
+	  ILI9341_DrawRectangle(&point_a, &point_b, &point_c, &point_d, gl.item_color, width);
+	  ILI9341_WriteString(point_a.x + offset, point_a.y + offset, adc_char, Font_7x10, gl.item_color, gl.theme_color);
   } else {
-	  ILI9341_DrawRectangle(&point_a, &point_b, &point_c, &point_d, ILI9341_WHITE, width);
-	  ILI9341_WriteString(point_a.x + offset, point_a.y + offset, adc_char, Font_7x10, ILI9341_WHITE, ILI9341_BLACK);
+	  ILI9341_DrawRectangle(&point_a, &point_b, &point_c, &point_d, gl.item_color, width);
+	  ILI9341_WriteString(point_a.x + offset, point_a.y + offset, adc_char, Font_7x10, gl.theme_color, gl.item_color);
   }
   HAL_ADC_Stop(&hadc2);
 }
@@ -115,56 +113,52 @@ void display_move_pixel(struct point *point_a, uint16_t bg_color, uint16_t color
 	ILI9341_DrawPoint(point_a, color);
 }
 
-void display_ground(struct point points[], int color, int width) {
-	ILI9341_DrawLine(&points[0], &points[1], color, width);
+void display_ground(int color, int width) {
+	struct point ground_points[] = {
+			{0, gl.leg_start_y + gl.leg_length},
+			{ILI9341_WIDTH, gl.leg_start_y + gl.leg_length}
+	};
+	ILI9341_DrawLine(&ground_points[0], &ground_points[1], color, width);
 }
 
 void display_ateist_man(int sword_color) {
-
-
-	struct point leg_l_start = {leg_start_x, leg_start_y};
-	struct point leg_l_end   = {leg_start_x - leg_width, leg_start_y + leg_length};
-	struct point leg_r_end   = {leg_start_x + leg_width, leg_start_y + leg_length};
-	struct point body_end    = {leg_start_x, leg_start_y - body_length};
-	struct point hand_l_end  = {leg_start_x - hand_width, leg_start_y - body_length + hand_length};
-	struct point hand_r_end  = {leg_start_x + hand_width, leg_start_y - body_length + hand_length};
-	struct point neck_end    = {leg_start_x, leg_start_y - body_length - neck_length};
-	struct point head_center = {leg_start_x, leg_start_y - body_length - neck_length - head_radius};
-	struct point hat_coord_l  = {leg_start_x - hat_width, leg_start_y - body_length - neck_length - 2 * head_radius};
-	struct point hat_coord_r  = {leg_start_x + hat_width, leg_start_y - body_length - neck_length - 2 * head_radius};
-	struct point hat_coord_t  = {leg_start_x, leg_start_y - body_length - neck_length - head_radius - 2 * head_radius - hat_height};
+	struct point leg_l_start = {gl.leg_start_x, gl.leg_start_y};
+	struct point leg_l_end   = {gl.leg_start_x - gl.leg_width, gl.leg_start_y + gl.leg_length};
+	struct point leg_r_end   = {gl.leg_start_x + gl.leg_width, gl.leg_start_y + gl.leg_length};
+	struct point body_end    = {gl.leg_start_x, gl.leg_start_y - gl.body_length};
+	struct point hand_l_end  = {gl.leg_start_x - gl.hand_width, gl.leg_start_y - gl.body_length + gl.hand_length};
+	struct point hand_r_end  = {gl.leg_start_x + gl.hand_width, gl.leg_start_y - gl.body_length + gl.hand_length};
+	struct point neck_end    = {gl.leg_start_x, gl.leg_start_y - gl.body_length - gl.neck_length};
+	struct point head_center = {gl.leg_start_x, gl.leg_start_y - gl.body_length - gl.neck_length - gl.head_radius};
+	struct point hat_coord_l  = {gl.leg_start_x - gl.hat_width, gl.leg_start_y - gl.body_length - gl.neck_length - 2 * gl.head_radius};
+	struct point hat_coord_r  = {gl.leg_start_x + gl.hat_width, gl.leg_start_y - gl.body_length - gl.neck_length - 2 * gl.head_radius};
+	struct point hat_coord_t  = {gl.leg_start_x, gl.leg_start_y - gl.body_length - gl.neck_length - gl.head_radius - 2 * gl.head_radius - gl.hat_height};
 	struct point skateboard_points[] = {
-			{leg_start_x - skateboard_len, leg_start_y + leg_length},
-			{leg_start_x + skateboard_len, leg_start_y + leg_length},
-			{leg_start_x + skateboard_len, leg_start_y + skateboard_height + leg_length},
-			{leg_start_x - skateboard_len, leg_start_y + skateboard_height + leg_length}
+			{gl.leg_start_x - gl.skateboard_len, gl.leg_start_y + gl.leg_length},
+			{gl.leg_start_x + gl.skateboard_len, gl.leg_start_y + gl.leg_length},
+			{gl.leg_start_x + gl.skateboard_len, gl.leg_start_y + gl.skateboard_height + gl.leg_length},
+			{gl.leg_start_x - gl.skateboard_len, gl.leg_start_y + gl.skateboard_height + gl.leg_length}
 	};
 	struct point wheel_points[] = {
-			{leg_start_x - skateboard_len + skateboard_offset, leg_start_y + leg_length + wheel_radius + skateboard_height},
-			{leg_start_x + skateboard_len - skateboard_offset, leg_start_y + leg_length + wheel_radius + skateboard_height}
+			{gl.leg_start_x - gl.skateboard_len + gl.skateboard_offset, gl.leg_start_y + gl.leg_length + gl.wheel_radius + gl.skateboard_height},
+			{gl.leg_start_x + gl.skateboard_len - gl.skateboard_offset, gl.leg_start_y + gl.leg_length + gl.wheel_radius + gl.skateboard_height}
 	};
-	struct point ground_points[] = {
-			{0, leg_start_y + leg_length},
-			{ILI9341_WIDTH, leg_start_y + leg_length}
-	};
+
 	struct point hand[] = {
-			{leg_start_x, leg_start_y - body_length},
-			{leg_start_x - hand_width, leg_start_y - body_length + hand_length}
+			{gl.leg_start_x, gl.leg_start_y - gl.body_length},
+			{gl.leg_start_x - gl.hand_width, gl.leg_start_y - gl.body_length + gl.hand_length}
 	};
 
-	ILI9341_DrawLine(&leg_l_start, &leg_l_end, ILI9341_BLACK, 1);
-	ILI9341_DrawLine(&leg_l_start, &leg_r_end, ILI9341_BLACK, 1);
-	ILI9341_DrawLine(&leg_l_start, &body_end, ILI9341_BLACK, 1);
-	ILI9341_DrawLine(&body_end, &hand_l_end, ILI9341_BLACK, 1);
-	ILI9341_DrawLine(&body_end, &hand_r_end, ILI9341_BLACK, 1);
-	ILI9341_DrawLine(&body_end, &neck_end, ILI9341_BLACK, 1);
-	ILI9341_DrawCircle(&head_center, head_radius, ILI9341_BLACK, 1);
-	ILI9341_DrawTriangle(&hat_coord_l, &hat_coord_t, &hat_coord_r, ILI9341_BLACK, 1);
+	ILI9341_DrawLine(&leg_l_start, &leg_l_end, gl.item_color, 1);
+	ILI9341_DrawLine(&leg_l_start, &leg_r_end, gl.item_color, 1);
+	ILI9341_DrawLine(&leg_l_start, &body_end, gl.item_color, 1);
+	ILI9341_DrawLine(&body_end, &hand_l_end, gl.item_color, 1);
+	ILI9341_DrawLine(&body_end, &hand_r_end, gl.item_color, 1);
+	ILI9341_DrawLine(&body_end, &neck_end, gl.item_color, 1);
+	ILI9341_DrawCircle(&head_center, gl.head_radius, gl.item_color, 1);
+	ILI9341_DrawTriangle(&hat_coord_l, &hat_coord_t, &hat_coord_r, gl.item_color, 1);
 
-	display_sword(hand_r_end.x, hand_r_end.y, ILI9341_BLACK, ILI9341_RED, 1);
 //	display_skateboard(skateboard_points, wheel_points, wheel_radius, ILI9341_BLACK, 1);
-	display_ground(ground_points, ILI9341_BLACK, 1);
-	display_man_handshake(hand, ILI9341_BLACK, 1);
 }
 
 void display_david_star(uint16_t color, int start_x, int start_y) {
@@ -186,6 +180,23 @@ void display_david_star(uint16_t color, int start_x, int start_y) {
 	ILI9341_DrawTriangle(&point_a1, &point_b1, &point_c1, color, width);
 }
 
+void display_bird(int color, int width) {
+	;
+}
+
+void display_star(int color, int width) {
+	struct point point_a = {gl.left_triangle_x, gl.left_triangle_y};
+	struct point point_b = {gl.top_triangle_x, gl.top_triangle_y};
+	struct point point_c = {gl.right_triangle_x, gl.right_triangle_y};
+	struct point point_e = {gl.left_triangle_x, gl.top_triangle_y + 10};
+	struct point point_f = {gl.right_triangle_x, gl.top_triangle_y + 10};
+	struct point point_g = {gl.bottom_triangle_x, gl.bottom_triangle_y};
+
+	ILI9341_DrawTriangle(&point_a, &point_b, &point_c, color, width);
+	ILI9341_DrawTriangle(&point_e, &point_f, &point_g, color, width);
+///	ILI9341_DrawTriangle();
+}
+
 void display_menu() {
 
 	ILI9341_FillScreen(ILI9341_BLACK);
@@ -195,7 +206,7 @@ void display_menu() {
 }
 
 void display_start_page() {
-	ILI9341_FillScreen(ILI9341_WHITE);
+	ILI9341_FillScreen(gl.theme_color);
 	// Read The ADC Conversion Result & Map It To PWM DutyCycle
 }
 

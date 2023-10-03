@@ -32,23 +32,6 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-struct global {
-	int leg_start_x;
-	int leg_start_y;
-	int leg_width;
-	int leg_length;
-	int body_length;
-	int hand_width;
-	int hand_length;
-	int neck_length;
-	int head_radius;
-	int hat_height;
-	int hat_width;
-	int skateboard_len;
-	int skateboard_height;
-	int skateboard_offset;
-	int wheel_radius;
-};
 
 struct global gl;
 int iteration = 0;
@@ -106,6 +89,23 @@ void init_globals() {
 	  gl.skateboard_height = 5;
 	  gl.skateboard_offset = 5;
 	  gl.wheel_radius = 5;
+	  gl.sword_width_distance_top = 4;
+	  gl.sword_height_distance_top = 12;
+	  gl.sword_width_distance_bottom = 5;
+	  gl.sword_height_distance_bottom = 5;
+	  gl.sword_line_width = 15;
+	  gl.sword_line_height = 40;
+	  gl.left_triangle_x = 10;
+	  gl.left_triangle_y = 40;
+	  gl.right_triangle_x = 50;
+	  gl.right_triangle_y = 40;
+	  gl.top_triangle_x = 30;
+	  gl.top_triangle_y = 20;
+	  gl.bottom_triangle_x = 30;
+	  gl.bottom_triangle_y = 50;
+	  gl.theme_color = ILI9341_BLACK;
+	  gl.item_color = ILI9341_WHITE;
+	  gl.sword_color = ILI9341_RED;
 }
 /*
 void max30102_plot(uint32_t ir_sample, uint32_t red_sample)
@@ -238,6 +238,9 @@ int main(void)
   init();
   display_start_page();
   display_ateist_man();
+  display_ground(gl.item_color, 1);
+  display_sword(gl.item_color, gl.sword_color, 1);
+  display_star(gl.item_color, 1);
   HAL_TIM_Base_Start_IT(&htim2);
   HAL_TIM_Base_Start_IT(&htim1);
   /* USER CODE END 2 */
