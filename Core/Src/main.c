@@ -201,7 +201,6 @@ int main(void)
   init();
   display_start_page();
   display_ateist_man();
-  display_man_handshake();
   HAL_TIM_Base_Start_IT(&htim2);
   HAL_TIM_Base_Start_IT(&htim1);
   /* USER CODE END 2 */

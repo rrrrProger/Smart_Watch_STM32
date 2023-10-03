@@ -58,34 +58,6 @@ static void display_skateboard(struct point points[], struct point wheel_points[
 	ILI9341_DrawCircle(&wheel_points[1], radius, color, width);
 }
 
-
-static struct point **get_line_display_points(struct point line_points[]) {
-	struct point *point_a = &line_points[0];
-	struct point *point_b = &line_points[1];
-	float x = point_a->x;
-	float y = point_a->y;
-	int16_t dx = point_b->x - point_a->x;
-	int16_t dy = point_b->y - point_a->y;
-	int steps = abs(dx) > abs(dy) ? abs(dx) : abs(dy);
-	float x_increment = dx / (float) steps;
-	float y_increment = dy / (float) steps;
-	struct point **line_points_n = (struct point **)malloc(sizeof(struct point*) * steps);
-	if (!line_points_n) {
-		return;
-	}
-
-	for (int v = 0; v < steps; v++) {
-		x = x + x_increment;
-		y = y + y_increment;
-		line_points_n[v] = (struct point*)malloc(sizeof(struct point));
-		if (!line_points_n[v])
-			return;
-		line_points_n[v]->x = x;
-		line_points_n[v]->y = y;
-	}
-	return line_points_n;
-}
-
 void display_date_and_time() {
 	ILI9341_WriteString(40, 10, date, Font_7x10, ILI9341_BLACK, ILI9341_WHITE);
 	ILI9341_WriteString(ILI9341_WIDTH / 2 - 27, ILI9341_HEIGHT - 10, time, Font_7x10, ILI9341_BLACK, ILI9341_WHITE);
@@ -128,6 +100,53 @@ void display_battery_status(int menu_context) {
 	  ILI9341_WriteString(point_a.x + offset, point_a.y + offset, adc_char, Font_7x10, ILI9341_WHITE, ILI9341_BLACK);
   }
   HAL_ADC_Stop(&hadc2);
+}
+
+void display_man_handshake(struct point hand[], int color, int width) {
+	int hand_length = sqrt(pow((hand[1].x - hand[0].x), 2) + pow((hand[1].y - hand[0].y), 2));
+	int hand_end_start_x = hand[1].x;
+	int hand_end_start_y = hand[1].y;
+
+	for (float phi = 0; phi < 1; phi = phi + 0.03) {
+		ILI9341_DrawLine(&hand[0], &hand[1], ILI9341_WHITE, 1);
+		hand[1].x = hand[0].x - hand_length * cos(phi);
+		hand[1].y = hand[0].y - hand_length * sin(phi);
+		hand[1].x = (int)hand[1].x;
+		hand[1].y = (int)hand[1].y;
+		ILI9341_DrawLine(&hand[0], &hand[1], ILI9341_BLACK, 1);
+	}
+	/*
+	struct point *point_a = &hand[0];
+	struct point *point_b = &hand[1];
+	float x = point_a->x;
+	float y = point_a->y;
+	int16_t dx = point_b->x - point_a->x;
+	int16_t dy = point_b->y - point_a->y;
+	int steps = abs(dx) > abs(dy) ? abs(dx) : abs(dy);
+	float x_increment = dx / (float) steps;
+	float y_increment = dy / (float) steps;
+	struct point *points_array = (struct point*)malloc(sizeof(struct point) * steps);
+
+	if (!points_array)
+		return;
+	for (int v = 0; v < steps; v++) {
+		x = x + x_increment;
+		y = y + y_increment;
+		if (width != 0 )
+			for (int j = 0; j < width; j++) {
+				ILI9341_DrawPixel(round(x), round(y), color);
+				ILI9341_DrawPixel(round(x) - width, round(y), color);
+				ILI9341_DrawPixel(round(x) + width, round(y), color);
+				ILI9341_DrawPixel(round(x), round(y) - width, color);
+				ILI9341_DrawPixel(round(x), round(y) + width, color);
+			}
+		else {
+			points_array[v].x = x;
+			points_array[v].y = y;
+			ILI9341_DrawPixel(round(x), round(y), color);
+		}
+	}
+	*/
 }
 
 void display_move_pixel(struct point *point_a, uint16_t bg_color, uint16_t color, int pos_x, int pos_y) {
@@ -183,6 +202,10 @@ void display_ateist_man() {
 			{0, leg_start_y + leg_length},
 			{ILI9341_WIDTH, leg_start_y + leg_length}
 	};
+	struct point hand[] = {
+			{leg_start_x, leg_start_y - body_length},
+			{leg_start_x - hand_width, leg_start_y - body_length + hand_length}
+	};
 
 	ILI9341_DrawLine(&leg_l_start, &leg_l_end, ILI9341_BLACK, 1);
 	ILI9341_DrawLine(&leg_l_start, &leg_r_end, ILI9341_BLACK, 1);
@@ -196,13 +219,7 @@ void display_ateist_man() {
 	display_sword(hand_r_end.x, hand_r_end.y, ILI9341_BLACK, ILI9341_GREEN, 1);
 //	display_skateboard(skateboard_points, wheel_points, wheel_radius, ILI9341_BLACK, 1);
 	display_ground(ground_points, ILI9341_BLACK, 1);
-}
-
-void display_man_handshake(struct point hand[]) {
-	struct point **hand_points;
-
-	hand_points = get_line_display_points(hand);
-
+	display_man_handshake(hand, ILI9341_BLACK, 1);
 }
 
 void display_david_star(uint16_t color, int start_x, int start_y) {
