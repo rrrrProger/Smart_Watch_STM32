@@ -201,6 +201,7 @@ int main(void)
   init();
   display_start_page();
   display_ateist_man();
+  display_man_handshake();
   HAL_TIM_Base_Start_IT(&htim2);
   HAL_TIM_Base_Start_IT(&htim1);
   /* USER CODE END 2 */
@@ -378,14 +379,14 @@ static void MX_RTC_Init(void)
   /** Initialize RTC and set the Time and Date
   */
   sTime.Hours = 0x13;
-  sTime.Minutes = 0x16;
+  sTime.Minutes = 0x46;
   sTime.Seconds = 0x0;
 
   if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BCD) != HAL_OK)
   {
     Error_Handler();
   }
-  DateToUpdate.WeekDay = RTC_WEEKDAY_SUNDAY;
+  DateToUpdate.WeekDay = RTC_WEEKDAY_TUESDAY;
   DateToUpdate.Month = RTC_MONTH_OCTOBER;
   DateToUpdate.Date = 0x1;
   DateToUpdate.Year = 0x23;

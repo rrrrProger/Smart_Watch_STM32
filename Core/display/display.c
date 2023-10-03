@@ -58,6 +58,34 @@ static void display_skateboard(struct point points[], struct point wheel_points[
 	ILI9341_DrawCircle(&wheel_points[1], radius, color, width);
 }
 
+
+static struct point **get_line_display_points(struct point line_points[]) {
+	struct point *point_a = &line_points[0];
+	struct point *point_b = &line_points[1];
+	float x = point_a->x;
+	float y = point_a->y;
+	int16_t dx = point_b->x - point_a->x;
+	int16_t dy = point_b->y - point_a->y;
+	int steps = abs(dx) > abs(dy) ? abs(dx) : abs(dy);
+	float x_increment = dx / (float) steps;
+	float y_increment = dy / (float) steps;
+	struct point **line_points_n = (struct point **)malloc(sizeof(struct point*) * steps);
+	if (!line_points_n) {
+		return;
+	}
+
+	for (int v = 0; v < steps; v++) {
+		x = x + x_increment;
+		y = y + y_increment;
+		line_points_n[v] = (struct point*)malloc(sizeof(struct point));
+		if (!line_points_n[v])
+			return;
+		line_points_n[v]->x = x;
+		line_points_n[v]->y = y;
+	}
+	return line_points_n;
+}
+
 void display_date_and_time() {
 	ILI9341_WriteString(40, 10, date, Font_7x10, ILI9341_BLACK, ILI9341_WHITE);
 	ILI9341_WriteString(ILI9341_WIDTH / 2 - 27, ILI9341_HEIGHT - 10, time, Font_7x10, ILI9341_BLACK, ILI9341_WHITE);
@@ -109,33 +137,8 @@ void display_move_pixel(struct point *point_a, uint16_t bg_color, uint16_t color
 	ILI9341_DrawPoint(point_a, color);
 }
 
-
-void display_ground() {
-	struct point point_hor_start = {0, 80};
-	struct point point_hor_end = {ILI9341_WIDTH, 80};
-	int i;
-	int i_end = ILI9341_WIDTH - 15;
-
-	ILI9341_DrawLine(&point_hor_start, &point_hor_end, ILI9341_BLACK, 0);
-	for (i = ILI9341_WIDTH; i > i_end; i = i - 15) {
-		struct point *point_s = (struct point *)malloc(sizeof(struct point));
-		struct point *point_e = (struct point *)malloc(sizeof(struct point));
-		if (point_s) {
-			point_s->x = i;
-			point_s->y = 80;
-		}
-		if (point_e) {
-			point_e->x = i - 10;
-			point_e->y = 95;
-		}
-		if (point_s) {
-			free(point_s);
-		}
-		if (point_e) {
-			free(point_e);
-		}
-
-	}
+void display_ground(struct point points[], int color, int width) {
+	ILI9341_DrawLine(&points[0], &points[1], color, width);
 }
 
 void display_ateist_man() {
@@ -176,6 +179,10 @@ void display_ateist_man() {
 			{leg_start_x - skateboard_len + skateboard_offset, leg_start_y + leg_length + wheel_radius + skateboard_height},
 			{leg_start_x + skateboard_len - skateboard_offset, leg_start_y + leg_length + wheel_radius + skateboard_height}
 	};
+	struct point ground_points[] = {
+			{0, leg_start_y + leg_length},
+			{ILI9341_WIDTH, leg_start_y + leg_length}
+	};
 
 	ILI9341_DrawLine(&leg_l_start, &leg_l_end, ILI9341_BLACK, 1);
 	ILI9341_DrawLine(&leg_l_start, &leg_r_end, ILI9341_BLACK, 1);
@@ -187,7 +194,15 @@ void display_ateist_man() {
 	ILI9341_DrawTriangle(&hat_coord_l, &hat_coord_t, &hat_coord_r, ILI9341_BLACK, 1);
 
 	display_sword(hand_r_end.x, hand_r_end.y, ILI9341_BLACK, ILI9341_GREEN, 1);
-	display_skateboard(skateboard_points, wheel_points, wheel_radius, ILI9341_BLACK, 1);
+//	display_skateboard(skateboard_points, wheel_points, wheel_radius, ILI9341_BLACK, 1);
+	display_ground(ground_points, ILI9341_BLACK, 1);
+}
+
+void display_man_handshake(struct point hand[]) {
+	struct point **hand_points;
+
+	hand_points = get_line_display_points(hand);
+
 }
 
 void display_david_star(uint16_t color, int start_x, int start_y) {
