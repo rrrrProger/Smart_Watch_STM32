@@ -23,7 +23,7 @@ struct item items[] = {
 		{30, 40, "Wifi connect", 0},
 };
 
-static void display_sword(int x, int y, int color, int sword_color, int width) {
+void display_sword(int x, int y, int color, int sword_color, int width) {
 	int sword_width_distance_top = 4;
 	int sword_height_distance_top = 12;
 	int sword_width_distance_bottom = 5;
@@ -106,47 +106,6 @@ void display_man_handshake(struct point hand[], int color, int width) {
 	int hand_length = sqrt(pow((hand[1].x - hand[0].x), 2) + pow((hand[1].y - hand[0].y), 2));
 	int hand_end_start_x = hand[1].x;
 	int hand_end_start_y = hand[1].y;
-
-	for (float phi = 0; phi < 1; phi = phi + 0.03) {
-		ILI9341_DrawLine(&hand[0], &hand[1], ILI9341_WHITE, 1);
-		hand[1].x = hand[0].x - hand_length * cos(phi);
-		hand[1].y = hand[0].y - hand_length * sin(phi);
-		hand[1].x = (int)hand[1].x;
-		hand[1].y = (int)hand[1].y;
-		ILI9341_DrawLine(&hand[0], &hand[1], ILI9341_BLACK, 1);
-	}
-	/*
-	struct point *point_a = &hand[0];
-	struct point *point_b = &hand[1];
-	float x = point_a->x;
-	float y = point_a->y;
-	int16_t dx = point_b->x - point_a->x;
-	int16_t dy = point_b->y - point_a->y;
-	int steps = abs(dx) > abs(dy) ? abs(dx) : abs(dy);
-	float x_increment = dx / (float) steps;
-	float y_increment = dy / (float) steps;
-	struct point *points_array = (struct point*)malloc(sizeof(struct point) * steps);
-
-	if (!points_array)
-		return;
-	for (int v = 0; v < steps; v++) {
-		x = x + x_increment;
-		y = y + y_increment;
-		if (width != 0 )
-			for (int j = 0; j < width; j++) {
-				ILI9341_DrawPixel(round(x), round(y), color);
-				ILI9341_DrawPixel(round(x) - width, round(y), color);
-				ILI9341_DrawPixel(round(x) + width, round(y), color);
-				ILI9341_DrawPixel(round(x), round(y) - width, color);
-				ILI9341_DrawPixel(round(x), round(y) + width, color);
-			}
-		else {
-			points_array[v].x = x;
-			points_array[v].y = y;
-			ILI9341_DrawPixel(round(x), round(y), color);
-		}
-	}
-	*/
 }
 
 void display_move_pixel(struct point *point_a, uint16_t bg_color, uint16_t color, int pos_x, int pos_y) {
@@ -160,22 +119,8 @@ void display_ground(struct point points[], int color, int width) {
 	ILI9341_DrawLine(&points[0], &points[1], color, width);
 }
 
-void display_ateist_man() {
-	int leg_start_x = ILI9341_WIDTH / 2;
-	int leg_start_y = ILI9341_HEIGHT / 2 + 10;
-	int leg_width = 10;
-	int leg_length = 20;
-	int body_length = 20;
-	int hand_width = 10;
-	int hand_length = 20;
-	int neck_length = 5;
-	int head_radius = 7;
-	int hat_height   = 5;
-	int hat_width   = 7;
-	int skateboard_len = 30;
-	int skateboard_height = 5;
-	int skateboard_offset = 5;
-	int wheel_radius = 5;
+void display_ateist_man(int sword_color) {
+
 
 	struct point leg_l_start = {leg_start_x, leg_start_y};
 	struct point leg_l_end   = {leg_start_x - leg_width, leg_start_y + leg_length};
@@ -216,7 +161,7 @@ void display_ateist_man() {
 	ILI9341_DrawCircle(&head_center, head_radius, ILI9341_BLACK, 1);
 	ILI9341_DrawTriangle(&hat_coord_l, &hat_coord_t, &hat_coord_r, ILI9341_BLACK, 1);
 
-	display_sword(hand_r_end.x, hand_r_end.y, ILI9341_BLACK, ILI9341_GREEN, 1);
+	display_sword(hand_r_end.x, hand_r_end.y, ILI9341_BLACK, ILI9341_RED, 1);
 //	display_skateboard(skateboard_points, wheel_points, wheel_radius, ILI9341_BLACK, 1);
 	display_ground(ground_points, ILI9341_BLACK, 1);
 	display_man_handshake(hand, ILI9341_BLACK, 1);

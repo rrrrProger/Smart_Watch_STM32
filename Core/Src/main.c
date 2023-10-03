@@ -32,6 +32,25 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
+struct global {
+	int leg_start_x;
+	int leg_start_y;
+	int leg_width;
+	int leg_length;
+	int body_length;
+	int hand_width;
+	int hand_length;
+	int neck_length;
+	int head_radius;
+	int hat_height;
+	int hat_width;
+	int skateboard_len;
+	int skateboard_height;
+	int skateboard_offset;
+	int wheel_radius;
+};
+
+struct global gl;
 int iteration = 0;
 int last_beat = 0;
 int delays[20];
@@ -71,6 +90,23 @@ char *get_week_day(int day) {
 	}
 }
 
+void init_globals() {
+	  gl.leg_start_x = ILI9341_WIDTH / 2;
+	  gl.leg_start_y = ILI9341_HEIGHT / 2 + 10;
+	  gl.leg_width = 10;
+	  gl.leg_length = 20;
+	  gl.body_length = 20;
+	  gl.hand_width = 10;
+	  gl.hand_length = 20;
+	  gl.neck_length = 5;
+	  gl.head_radius = 7;
+	  gl.hat_height   = 5;
+	  gl.hat_width   = 7;
+	  gl.skateboard_len = 30;
+	  gl.skateboard_height = 5;
+	  gl.skateboard_offset = 5;
+	  gl.wheel_radius = 5;
+}
 /*
 void max30102_plot(uint32_t ir_sample, uint32_t red_sample)
 {
@@ -170,6 +206,7 @@ void init() {
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+  init_globals();
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/

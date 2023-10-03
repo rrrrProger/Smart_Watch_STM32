@@ -10,5 +10,6 @@ void display_start_page();
 void display_bar(int selected_item, int color, int sword_color);
 void display_ateist_man();
 void display_man_handshake(struct point hand[], int color, int width);
+void display_sword(int x, int y, int color, int sword_color, int width);
 
 #define ITEMS_NUMBER 2
