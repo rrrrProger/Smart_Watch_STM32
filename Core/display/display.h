@@ -33,8 +33,18 @@ struct global {
 	int theme_color;
 	int item_color;
 	int sword_color;
+	int start_plane_x;
+	int start_plane_y;
 };
 
+
+struct display_object {
+	struct display_object *head;
+	struct point *point;
+	struct display_object *next;
+};
+
+struct display_object *display_object_add_point(struct display_object *obj, struct point *p);
 void display_date_and_time();
 void display_battery_status(int menu_context);
 void display_move_pixel(struct point *point_a, uint16_t bg_color, uint16_t color, int pos_x, int pos_y);
@@ -47,5 +57,6 @@ void display_ateist_man();
 void display_man_handshake(struct point hand[], int color, int width);
 void display_sword(int color, int sword_color, int width);
 void display_bird(int color, int width);
+void display_move_line();
 
 #define ITEMS_NUMBER 2

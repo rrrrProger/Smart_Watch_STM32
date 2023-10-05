@@ -75,12 +75,12 @@ char *get_week_day(int day) {
 
 void init_globals() {
 	  gl.leg_start_x = ILI9341_WIDTH / 2;
-	  gl.leg_start_y = ILI9341_HEIGHT / 2 + 10;
-	  gl.leg_width = 10;
-	  gl.leg_length = 20;
-	  gl.body_length = 20;
-	  gl.hand_width = 10;
-	  gl.hand_length = 20;
+	  gl.leg_start_y = ILI9341_HEIGHT / 2 + 30;
+	  gl.leg_width = 5;
+	  gl.leg_length = 10;
+	  gl.body_length = 10;
+	  gl.hand_width = 5;
+	  gl.hand_length = 10;
 	  gl.neck_length = 5;
 	  gl.head_radius = 7;
 	  gl.hat_height   = 5;
@@ -93,8 +93,8 @@ void init_globals() {
 	  gl.sword_height_distance_top = 12;
 	  gl.sword_width_distance_bottom = 5;
 	  gl.sword_height_distance_bottom = 5;
-	  gl.sword_line_width = 15;
-	  gl.sword_line_height = 40;
+	  gl.sword_line_width = 7;
+	  gl.sword_line_height = 20;
 	  gl.left_triangle_x = 10;
 	  gl.left_triangle_y = 40;
 	  gl.right_triangle_x = 50;
@@ -106,6 +106,8 @@ void init_globals() {
 	  gl.theme_color = ILI9341_BLACK;
 	  gl.item_color = ILI9341_WHITE;
 	  gl.sword_color = ILI9341_RED;
+	  gl.start_plane_x = 20;
+	  gl.start_plane_y = 30;
 }
 /*
 void max30102_plot(uint32_t ir_sample, uint32_t red_sample)
@@ -240,7 +242,8 @@ int main(void)
   display_ateist_man();
   display_ground(gl.item_color, 1);
   display_sword(gl.item_color, gl.sword_color, 1);
-  display_star(gl.item_color, 1);
+  display_move_plane();
+//  display_star(gl.item_color, 1);
   HAL_TIM_Base_Start_IT(&htim2);
   HAL_TIM_Base_Start_IT(&htim1);
   /* USER CODE END 2 */
@@ -417,17 +420,17 @@ static void MX_RTC_Init(void)
 
   /** Initialize RTC and set the Time and Date
   */
-  sTime.Hours = 0x13;
-  sTime.Minutes = 0x46;
+  sTime.Hours = 0x14;
+  sTime.Minutes = 0x26;
   sTime.Seconds = 0x0;
 
   if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BCD) != HAL_OK)
   {
     Error_Handler();
   }
-  DateToUpdate.WeekDay = RTC_WEEKDAY_TUESDAY;
+  DateToUpdate.WeekDay = RTC_WEEKDAY_THURSDAY;
   DateToUpdate.Month = RTC_MONTH_OCTOBER;
-  DateToUpdate.Date = 0x1;
+  DateToUpdate.Date = 0x5;
   DateToUpdate.Year = 0x23;
 
   if (HAL_RTC_SetDate(&hrtc, &DateToUpdate, RTC_FORMAT_BCD) != HAL_OK)

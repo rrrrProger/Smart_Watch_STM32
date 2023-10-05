@@ -24,6 +24,35 @@ struct item items[] = {
 		{30, 40, "Wifi connect", 0},
 };
 
+struct display_object *display_init_object(struct point *p) {
+	struct display_object *obj = (struct display_object *)malloc(sizeof(struct display_object));
+	if (obj) {
+		obj->point = p;
+		obj->next = NULL;
+		obj->head = obj;
+		return obj;
+	} else {
+		return NULL;
+	}
+}
+
+struct display_object *display_object_add_point(struct display_object *obj, struct point *p) {
+	struct display_object *last_obj = NULL;
+
+	for (struct display_object *temp = obj; temp != NULL; temp = temp->next) {
+		if (!temp->next)
+			last_obj = temp;
+	}
+	if (last_obj) {
+		last_obj->next = (struct display_object *)malloc(sizeof(struct display_object));
+		if (last_obj->next) {
+			last_obj->next->point = p;
+			last_obj->next->next = NULL;
+			last_obj->head = obj->head;
+		}
+	}
+}
+
 void display_sword(int color, int sword_color, int width) {
 	int x = gl.leg_start_x + gl.hand_width;
 	int y = gl.leg_start_y - gl.body_length + gl.hand_length;
@@ -104,6 +133,10 @@ void display_man_handshake(struct point hand[], int color, int width) {
 	int hand_length = sqrt(pow((hand[1].x - hand[0].x), 2) + pow((hand[1].y - hand[0].y), 2));
 	int hand_end_start_x = hand[1].x;
 	int hand_end_start_y = hand[1].y;
+}
+
+void display_move_plane() {
+	struct point *plane_points;
 }
 
 void display_move_pixel(struct point *point_a, uint16_t bg_color, uint16_t color, int pos_x, int pos_y) {
