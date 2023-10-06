@@ -240,6 +240,9 @@ void display_menu() {
 
 void display_start_page() {
 	ILI9341_FillScreen(gl.theme_color);
+	display_ateist_man(gl.sword_color);
+	display_ground(gl.item_color, 1);
+	display_sword(gl.item_color, gl.sword_color, 1);
 	// Read The ADC Conversion Result & Map It To PWM DutyCycle
 }
 
