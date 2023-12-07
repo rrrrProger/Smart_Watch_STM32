@@ -2,6 +2,8 @@
 
 #include "stm32f1xx_hal.h"
 #include "touch.h"
+#include "fonts.h"
+#include "st7735.h"
 
 #define READ_X 0xD0
 #define READ_Y 0x90
@@ -29,9 +31,9 @@ bool ILI9341_TouchGetCoordinates(uint16_t* x, uint16_t* y) {
     uint32_t avg_y = 0;
     uint8_t nsamples = 0;
     for(uint8_t i = 0; i < 16; i++) {
-        if(!ILI9341_TouchPressed())
-            break;
-
+        if(!ILI9341_TouchPressed()) {
+        	break;
+        }
         nsamples++;
 
         HAL_SPI_Transmit(&ILI9341_TOUCH_SPI_PORT, (uint8_t*)cmd_read_y, sizeof(cmd_read_y), HAL_MAX_DELAY);

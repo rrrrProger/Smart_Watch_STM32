@@ -239,19 +239,33 @@ int main(void)
   /* USER CODE BEGIN 2 */
   init();
   display_start_page();
-//  display_ateist_man();
+  display_ateist_man();
 //  display_ground(gl.item_color, 1);
 //  display_sword(gl.item_color, gl.sword_color, 1);
 //  display_move_plane();
 //  display_star(gl.item_color, 1);
   HAL_TIM_Base_Start_IT(&htim2);
   HAL_TIM_Base_Start_IT(&htim1);
+
+//  HAL_GPIO_WritePin(ESP_15_GPIO_Port, ESP_15_Pin, 0);
+//  HAL_GPIO_WritePin(ESP2_GPIO_Port, ESP2_Pin, 0);
+//  HAL_GPIO_WritePin(ESP0_GPIO_Port, ESP0_Pin, 0);
+//  HAL_Delay(1000);
+//  HAL_GPIO_WritePin(ESP0_GPIO_Port, ESP0_Pin, 1);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 1);
+	  HAL_Delay(1000);
+	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 0);
+	  HAL_Delay(1000);
+//	  HAL_UART_Transmit(&huart1, (uint8_t *)msg, strlen(msg), 1);
+//	  HAL_UART_Receive(&huart1, (uint8_t *)msg2, 2, 1);
+//	  ILI9341_WriteString(20, 20, msg2, Font_11x18, ILI9341_WHITE, ILI9341_BLACK);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -272,10 +286,10 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_LSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
@@ -296,7 +310,7 @@ void SystemClock_Config(void)
     Error_Handler();
   }
   PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_RTC|RCC_PERIPHCLK_ADC;
-  PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_HSE_DIV128;
+  PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_LSI;
   PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV2;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
@@ -420,8 +434,8 @@ static void MX_RTC_Init(void)
 
   /** Initialize RTC and set the Time and Date
   */
-  sTime.Hours = 0x19;
-  sTime.Minutes = 0x7;
+  sTime.Hours = 0x0;
+  sTime.Minutes = 0x0;
   sTime.Seconds = 0x0;
 
   if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BCD) != HAL_OK)
@@ -429,8 +443,8 @@ static void MX_RTC_Init(void)
     Error_Handler();
   }
   DateToUpdate.WeekDay = RTC_WEEKDAY_FRIDAY;
-  DateToUpdate.Month = RTC_MONTH_OCTOBER;
-  DateToUpdate.Date = 0x6;
+  DateToUpdate.Month = RTC_MONTH_SEPTEMBER;
+  DateToUpdate.Date = 0x22;
   DateToUpdate.Year = 0x23;
 
   if (HAL_RTC_SetDate(&hrtc, &DateToUpdate, RTC_FORMAT_BCD) != HAL_OK)
@@ -618,7 +632,6 @@ static void MX_GPIO_Init(void)
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOC_CLK_ENABLE();
-  __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
@@ -629,7 +642,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOA, CS_Pin|RESET_Pin|A0_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, SD_CS_Pin|T_CS_Pin|ESP0_Pin|ESP2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, SD_CS_Pin|ESP_15_Pin|T_CS_Pin|ESP2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : LED_Pin */
   GPIO_InitStruct.Pin = LED_Pin;
@@ -644,8 +657,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(Button3_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : Button2_Pin Button1_Pin T_IRQ_Pin */
-  GPIO_InitStruct.Pin = Button2_Pin|Button1_Pin|T_IRQ_Pin;
+  /*Configure GPIO pins : Button2_Pin Button1_Pin */
+  GPIO_InitStruct.Pin = Button2_Pin|Button1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
@@ -657,19 +670,28 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : SD_CS_Pin T_CS_Pin ESP0_Pin ESP2_Pin */
-  GPIO_InitStruct.Pin = SD_CS_Pin|T_CS_Pin|ESP0_Pin|ESP2_Pin;
+  /*Configure GPIO pins : SD_CS_Pin ESP_15_Pin T_CS_Pin ESP2_Pin */
+  GPIO_InitStruct.Pin = SD_CS_Pin|ESP_15_Pin|T_CS_Pin|ESP2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : T_IRQ_Pin */
+  GPIO_InitStruct.Pin = T_IRQ_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(T_IRQ_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : ESP0_Pin */
+  GPIO_InitStruct.Pin = ESP0_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(ESP0_GPIO_Port, &GPIO_InitStruct);
+
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI3_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI3_IRQn);
-
-  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */

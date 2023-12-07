@@ -70,6 +70,8 @@ void Error_Handler(void);
 #define Button1_GPIO_Port GPIOA
 #define SD_CS_Pin GPIO_PIN_0
 #define SD_CS_GPIO_Port GPIOB
+#define ESP_15_Pin GPIO_PIN_1
+#define ESP_15_GPIO_Port GPIOB
 #define T_CS_Pin GPIO_PIN_12
 #define T_CS_GPIO_Port GPIOB
 #define RESET_Pin GPIO_PIN_8
@@ -78,7 +80,6 @@ void Error_Handler(void);
 #define A0_GPIO_Port GPIOA
 #define T_IRQ_Pin GPIO_PIN_12
 #define T_IRQ_GPIO_Port GPIOA
-#define T_IRQ_EXTI_IRQn EXTI15_10_IRQn
 #define ESP0_Pin GPIO_PIN_8
 #define ESP0_GPIO_Port GPIOB
 #define ESP2_Pin GPIO_PIN_9
